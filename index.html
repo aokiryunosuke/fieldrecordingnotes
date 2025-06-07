@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>WAVファイル再生リスト</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet" />
   <style>
     body {
       font-family: 'Noto Sans JP', sans-serif;
-      padding: 20px;
       background: #d8f5d2;
       margin: 0;
+      padding: 20px;
     }
 
     h1 {
+      text-align: center;
       color: #333;
       font-size: 1.8rem;
-      text-align: center;
       margin-bottom: 2rem;
     }
 
@@ -37,13 +37,19 @@
       height: auto;
       border-radius: 8px;
       margin-bottom: 10px;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+
+    .file-item img:hover {
+      transform: scale(1.02);
     }
 
     .file-item div {
       width: 100%;
     }
 
-    .file-item audio {
+    audio {
       width: 100%;
       margin-top: 10px;
     }
@@ -51,7 +57,6 @@
     .comment {
       margin-top: 10px;
       color: #555;
-      font-size: 0.95rem;
     }
 
     @media (min-width: 600px) {
@@ -70,6 +75,50 @@
         flex: 1;
       }
     }
+
+    /* モーダル */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.9);
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal img {
+      max-width: 90%;
+      max-height: 80vh;
+      border-radius: 10px;
+    }
+
+    .modal-controls {
+      position: absolute;
+      width: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+
+    .modal-controls span {
+      font-size: 3rem;
+      color: white;
+      padding: 0 1rem;
+      cursor: pointer;
+      user-select: none;
+      pointer-events: auto;
+    }
   </style>
 </head>
 <body>
@@ -77,34 +126,38 @@
   <h1>WAVファイル再生リスト</h1>
   <div id="file-list"></div>
 
+  <!-- モーダル（画像＋スライド） -->
+  <div id="imageModal" class="modal">
+    <div class="modal-controls">
+      <span onclick="changeSlide(-1)">&#10094;</span>
+      <span onclick="changeSlide(1)">&#10095;</span>
+    </div>
+    <img id="modalImage" src="" alt="拡大画像">
+  </div>
+
   <script>
     const files = [
-      {
-        name: "sound1.wav",
-        image: "image1.jpg",
-        comment: "公園で録音した鳥のさえずりです。"
-      },
-      {
-        name: "sound2.wav",
-        image: "image2.jpg",
-        comment: "海辺で録音した波の音です。"
-      },
-      {
-        name: "sound3.wav",
-        image: "image3.jpg",
-        comment: "夜の森で録音した虫の声です。"
-      }
+      { name: "sound1.wav", image: "image1.jpg", comment: "公園で録音した鳥のさえずりです。" },
+      { name: "sound2.wav", image: "image2.jpg", comment: "海辺で録音した波の音です。" },
+      { name: "sound3.wav", image: "image3.jpg", comment: "夜の森で録音した虫の声です。" }
     ];
 
     const container = document.getElementById("file-list");
+    const modal = document.getElementById("imageModal");
+    const modalImg = document.getElementById("modalImage");
+    let currentIndex = 0;
 
-    files.forEach(file => {
+    // タッチ位置保存用
+    let touchStartX = 0;
+
+    files.forEach((file, index) => {
       const div = document.createElement("div");
       div.className = "file-item";
 
       const img = document.createElement("img");
       img.src = file.image;
       img.alt = file.name;
+      img.onclick = () => openModal(index);
 
       const content = document.createElement("div");
 
@@ -125,10 +178,53 @@
 
       div.appendChild(img);
       div.appendChild(content);
-
       container.appendChild(div);
     });
-  </script>
 
+    function openModal(index) {
+      currentIndex = index;
+      modalImg.src = files[currentIndex].image;
+      modal.classList.add("show");
+    }
+
+    function changeSlide(direction) {
+      currentIndex = (currentIndex + direction + files.length) % files.length;
+      modalImg.src = files[currentIndex].image;
+    }
+
+    function closeModal() {
+      modal.classList.remove("show");
+    }
+
+    // 背景クリックでモーダル閉じる
+    modal.addEventListener("click", e => {
+      if (e.target === modal) closeModal();
+    });
+
+    // キーボード操作対応
+    document.addEventListener("keydown", e => {
+      if (!modal.classList.contains("show")) return;
+      if (e.key === "Escape") closeModal();
+      if (e.key === "ArrowRight") changeSlide(1);
+      if (e.key === "ArrowLeft") changeSlide(-1);
+    });
+
+    // スワイプ対応
+    modal.addEventListener("touchstart", e => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+
+    modal.addEventListener("touchend", e => {
+      const touchEndX = e.changedTouches[0].screenX;
+      const diff = touchEndX - touchStartX;
+      if (Math.abs(diff) > 50) {
+        if (diff > 0) {
+          changeSlide(-1); // 右スワイプ
+        } else {
+          changeSlide(1);  // 左スワイプ
+        }
+      }
+    });
+  </script>
 </body>
 </html>
