@@ -5,16 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>WAVファイル再生リスト</title>
 
-  <!-- SEO対策 -->
-  <meta name="description" content="環境音を集めたWAVファイルの再生リスト。自然の音を聴いてリラックス。">
-  <meta name="robots" content="index, follow">
+  <!-- SEO -->
+  <meta name="description" content="自然環境音を収録したWAVファイルの再生リスト。鳥のさえずり、波の音、虫の声など。" />
+  <meta name="robots" content="index, follow" />
   <meta property="og:title" content="WAVファイル再生リスト" />
-  <meta property="og:description" content="自然環境音を収録したWAVファイルを聴いてリラックス。鳥のさえずり、波の音など。" />
+  <meta property="og:description" content="自然環境音を収録したWAVファイル。リラックス効果のある音を集めました。" />
   <meta property="og:type" content="website" />
   <meta property="og:locale" content="ja_JP" />
-  <meta property="og:image" content="image1.jpg" />
 
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet" />
   <style>
     body {
       font-family: 'Noto Sans JP', sans-serif;
@@ -25,21 +24,41 @@
 
     h1 {
       text-align: center;
-      color: #333;
-      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+
+    #search {
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto 1.5rem;
+      padding: 8px;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid #aaa;
+      display: block;
+    }
+
+    #toc {
       margin-bottom: 2rem;
+      padding-left: 1rem;
+    }
+
+    #toc ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    #toc li {
+      margin-bottom: 4px;
     }
 
     .file-item {
       background: #fff;
       border: 1px solid #ccc;
       border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
       padding: 15px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
 
     .image-wrapper {
@@ -50,14 +69,8 @@
 
     .image-wrapper img {
       width: 100%;
-      height: auto;
       border-radius: 8px;
       cursor: pointer;
-      transition: transform 0.3s;
-    }
-
-    .image-wrapper:hover img {
-      transform: scale(1.02);
     }
 
     .zoom-icon {
@@ -66,20 +79,20 @@
       right: 8px;
       background: rgba(0, 0, 0, 0.6);
       color: white;
-      font-size: 1.2rem;
-      padding: 4px 6px;
+      font-size: 0.9rem;
+      padding: 2px 5px;
       border-radius: 4px;
       pointer-events: none;
-    }
-
-    .comment {
-      margin-top: 10px;
-      color: #555;
     }
 
     audio {
       width: 100%;
       margin-top: 10px;
+    }
+
+    .comment {
+      margin-top: 8px;
+      color: #555;
     }
 
     @media (max-width: 599px) {
@@ -90,13 +103,13 @@
 
     @media (min-width: 600px) {
       .file-item {
-        flex-direction: row;
-        align-items: flex-start;
+        display: flex;
         gap: 20px;
+        align-items: flex-start;
       }
 
       .image-wrapper {
-        max-width: 200px;
+        max-width: 160px;
         flex-shrink: 0;
       }
 
@@ -105,18 +118,15 @@
       }
     }
 
-    /* モーダル */
     .modal {
       display: none;
       position: fixed;
-      z-index: 1000;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0,0,0,0.9);
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.9);
       justify-content: center;
       align-items: center;
+      z-index: 1000;
     }
 
     .modal.show {
@@ -133,72 +143,118 @@
 <body>
 
   <h1>WAVファイル再生リスト</h1>
+
+  <input type="text" id="search" placeholder="キーワードで検索（例: 鳥、sound2）" />
+
+  <nav id="toc">
+    <h2>目次</h2>
+    <ul id="toc-list"></ul>
+  </nav>
+
   <div id="file-list"></div>
 
-  <!-- 拡大モーダル -->
+  <!-- 拡大画像モーダル -->
   <div id="imageModal" class="modal" onclick="closeModal(event)">
     <img id="modalImage" src="" alt="拡大画像">
   </div>
 
   <script>
     const files = [
-      { name: "sound1.wav", image: "image1.jpg", comment: "公園で録音した鳥のさえずりです。" },
-      { name: "sound2.wav", image: "image2.jpg", comment: "海辺で録音した波の音です。" },
-      { name: "sound3.wav", image: "image3.jpg", comment: "夜の森で録音した虫の声です。" }
+      {
+        name: "sound1.wav",
+        image: "image1.jpg",
+        comment: "公園で録音した鳥のさえずりです。"
+      },
+      {
+        name: "sound2.wav",
+        image: "image2.jpg",
+        comment: "海辺で録音した波の音です。"
+      },
+      {
+        name: "sound3.wav",
+        image: "image3.jpg",
+        comment: "夜の森で録音した虫の声です。"
+      }
     ];
 
-    const container = document.getElementById("file-list");
+    const fileList = document.getElementById("file-list");
+    const tocList = document.getElementById("toc-list");
+    const searchInput = document.getElementById("search");
     const modal = document.getElementById("imageModal");
     const modalImg = document.getElementById("modalImage");
 
-    files.forEach((file, index) => {
-      const div = document.createElement("div");
-      div.className = "file-item";
+    function renderList(filter = "") {
+      fileList.innerHTML = "";
+      tocList.innerHTML = "";
 
-      const wrapper = document.createElement("div");
-      wrapper.className = "image-wrapper";
+      files.forEach((file, index) => {
+        const match = (file.name + file.comment).toLowerCase().includes(filter.toLowerCase());
+        if (!match) return;
 
-      const img = document.createElement("img");
-      img.src = file.image;
-      img.alt = file.name;
-      img.onclick = () => {
-        modalImg.src = file.image;
-        modal.classList.add("show");
-      };
+        const id = `item-${index}`;
 
-      const zoom = document.createElement("div");
-      zoom.className = "zoom-icon";
-      zoom.textContent = "🔍拡大";
+        const tocItem = document.createElement("li");
+        const tocLink = document.createElement("a");
+        tocLink.href = `#${id}`;
+        tocLink.textContent = file.name.replace(/\.\w+$/, "");
+        tocItem.appendChild(tocLink);
+        tocList.appendChild(tocItem);
 
-      wrapper.appendChild(img);
-      wrapper.appendChild(zoom);
+        const item = document.createElement("div");
+        item.className = "file-item";
+        item.id = id;
 
-      const content = document.createElement("div");
-      const title = document.createElement("div");
-      title.textContent = file.name;
+        const wrapper = document.createElement("div");
+        wrapper.className = "image-wrapper";
 
-      const audio = document.createElement("audio");
-      audio.controls = true;
-      audio.src = file.name;
+        const img = document.createElement("img");
+        img.src = file.image;
+        img.alt = file.name;
+        img.onclick = () => {
+          modalImg.src = file.image;
+          modal.classList.add("show");
+        };
 
-      const comment = document.createElement("div");
-      comment.className = "comment";
-      comment.textContent = "コメント：" + file.comment;
+        const zoom = document.createElement("div");
+        zoom.className = "zoom-icon";
+        zoom.textContent = "🔍拡大";
 
-      content.appendChild(title);
-      content.appendChild(audio);
-      content.appendChild(comment);
+        wrapper.appendChild(img);
+        wrapper.appendChild(zoom);
 
-      div.appendChild(wrapper);
-      div.appendChild(content);
-      container.appendChild(div);
-    });
+        const content = document.createElement("div");
+        const title = document.createElement("div");
+        title.textContent = file.name;
+
+        const audio = document.createElement("audio");
+        audio.controls = true;
+        audio.src = file.name;
+
+        const comment = document.createElement("div");
+        comment.className = "comment";
+        comment.textContent = "コメント：" + file.comment;
+
+        content.appendChild(title);
+        content.appendChild(audio);
+        content.appendChild(comment);
+
+        item.appendChild(wrapper);
+        item.appendChild(content);
+        fileList.appendChild(item);
+      });
+    }
 
     function closeModal(e) {
       if (e.target === modal || e.target === modalImg) {
         modal.classList.remove("show");
       }
     }
+
+    searchInput.addEventListener("input", () => {
+      renderList(searchInput.value);
+    });
+
+    renderList();
   </script>
 
 </body>
