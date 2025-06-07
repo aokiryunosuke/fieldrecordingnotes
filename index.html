@@ -5,73 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>フィールドレコーディングノート</title>
 
-  <!-- SEO -->
-  <meta name="description" content="自然環境音のWAVファイルを再生。鳥の声、波の音などを高音質で。リラックスや瞑想に最適なフィールドレコーディングノート。">
-  <meta name="robots" content="index, follow" />
-  <meta property="og:title" content="フィールドレコーディングノート" />
-  <meta property="og:description" content="自然環境音を収録したWAVファイル。リラックス効果のある音を集めた録音ノート。" />
-  <meta property="og:type" content="website" />
-  <meta property="og:locale" content="ja_JP" />
+  <!-- Leaflet.js（無料地図ライブラリ） -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet" />
+  <!-- フォント -->
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500&display=swap" rel="stylesheet" />
+
   <style>
     body {
-      font-family: 'Noto Sans JP', sans-serif;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
       margin: 0;
       padding: 20px;
-      background-color: #b3e5fc;
-      background-image: radial-gradient(white 10%, transparent 11%);
-      background-size: 20px 20px;
+      background-color: #eae3d2;
     }
 
     h1 {
       text-align: center;
+      font-size: 1.8rem;
       margin-bottom: 1rem;
-    }
-
-    #search {
-      width: 100%;
-      max-width: 100%;
-      box-sizing: border-box;
-      margin: 0 auto 1.5rem;
-      padding: 10px;
-      font-size: 1rem;
-      border-radius: 6px;
-      border: 1px solid #aaa;
-      display: block;
-    }
-
-    #toc {
-      margin-bottom: 2rem;
-      overflow-x: auto;
-    }
-
-    #toc ul {
-      display: flex;
-      list-style: none;
-      gap: 10px;
-      padding: 0;
-      margin: 0;
+      color: #4a3f35;
       white-space: nowrap;
     }
 
-    #toc li {
-      flex-shrink: 0;
-    }
-
-    #toc a {
-      display: block;
-      padding: 6px 12px;
-      background: #fff;
-      border: 1px solid #aaa;
-      border-radius: 5px;
-      text-decoration: none;
-      color: #333;
-      font-size: 0.9rem;
-    }
-
-    #toc a:hover {
-      background: #cceeff;
+    #file-list {
+      margin-bottom: 2rem;
     }
 
     .file-item {
@@ -83,40 +41,11 @@
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
 
-    .image-wrapper {
-      position: relative;
-      display: inline-block;
-      max-width: 100%;
-    }
-
-    .image-wrapper img {
-      width: 100%;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    .zoom-icon {
-      position: absolute;
-      bottom: 8px;
-      right: 8px;
-      background: rgba(0, 0, 0, 0.6);
-      color: white;
-      font-size: 0.9rem;
-      padding: 2px 5px;
-      border-radius: 4px;
-      pointer-events: none;
-    }
-
-    audio {
-      width: 100%;
-      margin-top: 10px;
-    }
-
     .title {
       font-weight: bold;
       font-size: 1.2rem;
       margin-bottom: 8px;
-      color: #222;
+      color: #4a3f35;
     }
 
     .comment {
@@ -124,49 +53,27 @@
       color: #555;
     }
 
+    audio {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    #map {
+      height: 400px;
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid #aaa;
+    }
+
+    .popup-title {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
     @media (max-width: 599px) {
-      .image-wrapper {
+      .file-item img {
         max-width: 60%;
       }
-    }
-
-    @media (min-width: 600px) {
-      .file-item {
-        display: flex;
-        gap: 20px;
-        align-items: flex-start;
-        flex-wrap: wrap;
-      }
-
-      .image-wrapper {
-        max-width: 160px;
-        flex-shrink: 0;
-      }
-
-      .file-item div {
-        flex: 1;
-      }
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: rgba(0, 0, 0, 0.9);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-
-    .modal.show {
-      display: flex;
-    }
-
-    .modal img {
-      max-width: 90%;
-      max-height: 80vh;
-      border-radius: 10px;
     }
   </style>
 </head>
@@ -174,17 +81,10 @@
 
   <h1>フィールドレコーディングノート</h1>
 
-  <input type="text" id="search" placeholder="タイトル・コメントで検索（例: 鳥、波）" />
-
-  <nav id="toc">
-    <ul id="toc-list"></ul>
-  </nav>
-
   <div id="file-list"></div>
 
-  <div id="imageModal" class="modal" onclick="closeModal(event)">
-    <img id="modalImage" src="" alt="拡大画像">
-  </div>
+  <h2 style="text-align:center; color:#4a3f35;">録音ロケーションマップ</h2>
+  <div id="map"></div>
 
   <script>
     const files = [
@@ -192,102 +92,70 @@
         name: "sound1.wav",
         image: "image1.jpg",
         title: "鳥のさえずり",
-        comment: "公園で録音した鳥のさえずりです。"
+        comment: "公園で録音した鳥のさえずりです。",
+        lat: 35.6895,
+        lng: 139.6917
       },
       {
         name: "sound2.wav",
         image: "image2.jpg",
         title: "波の音",
-        comment: "海辺で録音した波の音です。"
+        comment: "海辺で録音した波の音です。",
+        lat: 35.3000,
+        lng: 139.5500
       },
       {
         name: "sound3.wav",
         image: "image3.jpg",
         title: "虫の声",
-        comment: "夜の森で録音した虫の声です。"
+        comment: "夜の森で録音した虫の声です。",
+        lat: 36.2048,
+        lng: 138.2529
       }
     ];
 
     const fileList = document.getElementById("file-list");
-    const tocList = document.getElementById("toc-list");
-    const searchInput = document.getElementById("search");
-    const modal = document.getElementById("imageModal");
-    const modalImg = document.getElementById("modalImage");
 
-    function renderList(filter = "") {
-      fileList.innerHTML = "";
-      tocList.innerHTML = "";
+    files.forEach(file => {
+      const item = document.createElement("div");
+      item.className = "file-item";
 
-      files.forEach((file, index) => {
-        const match = (file.title + file.comment).toLowerCase().includes(filter.toLowerCase());
-        if (!match) return;
+      const titleEl = document.createElement("div");
+      titleEl.className = "title";
+      titleEl.textContent = file.title;
 
-        const id = `item-${index}`;
+      const audio = document.createElement("audio");
+      audio.controls = true;
+      audio.src = file.name;
 
-        const tocItem = document.createElement("li");
-        const tocLink = document.createElement("a");
-        tocLink.href = `#${id}`;
-        tocLink.textContent = file.title;
-        tocItem.appendChild(tocLink);
-        tocList.appendChild(tocItem);
+      const comment = document.createElement("div");
+      comment.className = "comment";
+      comment.textContent = "コメント：" + file.comment;
 
-        const item = document.createElement("div");
-        item.className = "file-item";
-        item.id = id;
-
-        const content = document.createElement("div");
-
-        const titleEl = document.createElement("div");
-        titleEl.className = "title";
-        titleEl.textContent = file.title;
-
-        const wrapper = document.createElement("div");
-        wrapper.className = "image-wrapper";
-
-        const img = document.createElement("img");
-        img.src = file.image;
-        img.alt = file.title;
-        img.onclick = () => {
-          modalImg.src = file.image;
-          modal.classList.add("show");
-        };
-
-        const zoom = document.createElement("div");
-        zoom.className = "zoom-icon";
-        zoom.textContent = "🔍拡大";
-
-        wrapper.appendChild(img);
-        wrapper.appendChild(zoom);
-
-        const audio = document.createElement("audio");
-        audio.controls = true;
-        audio.src = file.name;
-
-        const comment = document.createElement("div");
-        comment.className = "comment";
-        comment.textContent = "コメント：" + file.comment;
-
-        content.appendChild(titleEl);
-        content.appendChild(wrapper);
-        content.appendChild(audio);
-        content.appendChild(comment);
-
-        item.appendChild(content);
-        fileList.appendChild(item);
-      });
-    }
-
-    function closeModal(e) {
-      if (e.target === modal || e.target === modalImg) {
-        modal.classList.remove("show");
-      }
-    }
-
-    searchInput.addEventListener("input", () => {
-      renderList(searchInput.value);
+      item.appendChild(titleEl);
+      item.appendChild(audio);
+      item.appendChild(comment);
+      fileList.appendChild(item);
     });
 
-    renderList();
+    // 地図の初期設定（中央は日本）
+    const map = L.map('map').setView([36.2048, 138.2529], 6);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // マーカーを追加
+    files.forEach(file => {
+      if (file.lat && file.lng) {
+        const marker = L.marker([file.lat, file.lng]).addTo(map);
+        marker.bindPopup(`
+          <div class="popup-title">${file.title}</div>
+          <div>${file.comment}</div>
+          <audio controls src="${file.name}" style="width:100%; margin-top:5px;"></audio>
+        `);
+      }
+    });
   </script>
 
 </body>
