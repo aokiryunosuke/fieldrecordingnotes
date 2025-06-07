@@ -227,4 +227,33 @@
       modal.classList.remove("show");
     }
 
-    mod
+    modal.addEventListener("click", e => {
+      if (e.target === modal) closeModal();
+    });
+
+    document.addEventListener("keydown", e => {
+      if (!modal.classList.contains("show")) return;
+      if (e.key === "Escape") closeModal();
+      if (e.key === "ArrowRight") changeSlide(1);
+      if (e.key === "ArrowLeft") changeSlide(-1);
+    });
+
+    modal.addEventListener("touchstart", e => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+
+    modal.addEventListener("touchend", e => {
+      const touchEndX = e.changedTouches[0].screenX;
+      const diff = touchEndX - touchStartX;
+      if (Math.abs(diff) > 50) {
+        if (diff > 0) {
+          changeSlide(-1);
+        } else {
+          changeSlide(1);
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>
