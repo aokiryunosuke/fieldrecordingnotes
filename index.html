@@ -45,7 +45,7 @@
     }
 
     #toc {
-      margin-bottom: 2rem;
+      margin-bottom: 1rem;
       overflow-x: auto;
     }
 
@@ -75,6 +75,14 @@
 
     #toc a:hover {
       background: #cceeff;
+    }
+
+    #map {
+      height: 400px;
+      width: 100%;
+      margin-bottom: 2rem;
+      border: 2px solid #888;
+      border-radius: 8px;
     }
 
     .file-item {
@@ -125,14 +133,6 @@
     .comment {
       margin-top: 8px;
       color: #555;
-    }
-
-    #map {
-      height: 400px;
-      width: 100%;
-      margin-top: 2rem;
-      border: 2px solid #888;
-      border-radius: 8px;
     }
 
     @media (max-width: 599px) {
@@ -191,9 +191,9 @@
     <ul id="toc-list"></ul>
   </nav>
 
-  <div id="file-list"></div>
-
   <div id="map"></div>
+
+  <div id="file-list"></div>
 
   <div id="imageModal" class="modal" onclick="closeModal(event)">
     <img id="modalImage" src="" alt="拡大画像">
@@ -308,24 +308,24 @@
 
     renderList();
 
-    // 地図表示
     const map = L.map('map').setView([36.2, 138.2], 6);
-
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    files.forEach(file => {
+    files.forEach((file, index) => {
       if (file.lat && file.lng) {
+        const id = `item-${index}`;
         const marker = L.marker([file.lat, file.lng]).addTo(map);
         marker.bindPopup(`
           <strong>${file.title}</strong><br>
-          ${file.comment}<br>
-          <audio controls src="${file.name}" style="width:100%; margin-top:4px;"></audio>
+          <img src="${file.image}" alt="${file.title}" style="width:100px; border-radius:6px; margin-top:5px;"><br>
+          <audio controls src="${file.name}" style="width:100%; margin-top:5px;"></audio><br>
+          <small>${file.comment}</small><br>
+          <button onclick=\"document.getElementById('${id}').scrollIntoView({ behavior: 'smooth' });\">詳細へ移動</button>
         `);
       }
     });
   </script>
-
 </body>
 </html>
