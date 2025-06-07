@@ -23,13 +23,13 @@
       font-family: 'Noto Sans JP', sans-serif;
       margin: 0;
       padding: 20px;
-      background-color: #e0e0d1; /* 渋い薄い茶色 */
+      background-color: #e0e0d1;
     }
 
     h1 {
       text-align: center;
       margin-bottom: 1rem;
-      font-size: 1rem; /* 小さくする */
+      font-size: 1rem;
       font-weight: 400;
     }
 
@@ -42,39 +42,6 @@
       border-radius: 6px;
       border: 1px solid #aaa;
       display: block;
-    }
-
-    #toc {
-      margin-bottom: 1rem;
-      overflow-x: auto;
-    }
-
-    #toc ul {
-      display: flex;
-      list-style: none;
-      gap: 10px;
-      padding: 0;
-      margin: 0;
-      white-space: nowrap;
-    }
-
-    #toc li {
-      flex-shrink: 0;
-    }
-
-    #toc a {
-      display: block;
-      padding: 6px 12px;
-      background: #fff;
-      border: 1px solid #aaa;
-      border-radius: 5px;
-      text-decoration: none;
-      color: #333;
-      font-size: 0.9rem;
-    }
-
-    #toc a:hover {
-      background: #cceeff;
     }
 
     #map {
@@ -187,10 +154,6 @@
 
   <input type="text" id="search" placeholder="タイトル・コメントで検索（例: 鳥、波）" />
 
-  <nav id="toc">
-    <ul id="toc-list"></ul>
-  </nav>
-
   <div id="map"></div>
 
   <div id="file-list"></div>
@@ -228,27 +191,18 @@
     ];
 
     const fileList = document.getElementById("file-list");
-    const tocList = document.getElementById("toc-list");
     const searchInput = document.getElementById("search");
     const modal = document.getElementById("imageModal");
     const modalImg = document.getElementById("modalImage");
 
     function renderList(filter = "") {
       fileList.innerHTML = "";
-      tocList.innerHTML = "";
 
       files.forEach((file, index) => {
         const match = (file.title + file.comment).toLowerCase().includes(filter.toLowerCase());
         if (!match) return;
 
         const id = `item-${index}`;
-
-        const tocItem = document.createElement("li");
-        const tocLink = document.createElement("a");
-        tocLink.href = `#${id}`;
-        tocLink.textContent = file.title;
-        tocItem.appendChild(tocLink);
-        tocList.appendChild(tocItem);
 
         const item = document.createElement("div");
         item.className = "file-item";
