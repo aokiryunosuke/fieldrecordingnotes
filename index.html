@@ -146,6 +146,19 @@
       max-height: 80vh;
       border-radius: 10px;
     }
+
+    #backToTop {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #444;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      z-index: 1001;
+    }
   </style>
 </head>
 <body>
@@ -161,6 +174,8 @@
   <div id="imageModal" class="modal" onclick="closeModal(event)">
     <img id="modalImage" src="" alt="拡大画像">
   </div>
+
+  <div id="backToTop" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">▲ トップへ戻る</div>
 
   <script>
     const files = [
@@ -273,8 +288,7 @@
         const marker = L.marker([file.lat, file.lng]).addTo(map);
         marker.bindPopup(`
           <strong>${file.title}</strong><br>
-          <img src="${file.image}" alt="${file.title}" style="width:100px; border-radius:6px; margin-top:5px;"><br>
-          <audio controls src="${file.name}" style="width:100%; margin-top:5px;"></audio><br>
+          <img src="${file.image}" alt="${file.title}" style="width:80px; border-radius:4px; margin-top:5px;"><br>
           <small>${file.comment}</small><br>
           <button onclick=\"document.getElementById('${id}').scrollIntoView({ behavior: 'smooth' });\">詳細へ移動</button>
         `);
