@@ -9,7 +9,7 @@
   <meta name="description" content="自然環境音のWAVファイルを再生。鳥の声、波の音などを高音質で。リラックスや瞑想に最適です。">
   <meta name="robots" content="index, follow" />
   <meta property="og:title" content="WAVファイル再生リスト" />
-  <meta property="og:description" content="自然環境音を収録したWAVファイルを聴くことができます。" />
+  <meta property="og:description" content="自然環境音を収録したWAVファイル。リラックス効果のある音を集めました。" />
   <meta property="og:type" content="website" />
   <meta property="og:locale" content="ja_JP" />
 
@@ -29,9 +29,10 @@
 
     #search {
       width: 100%;
-      max-width: 500px;
+      max-width: 100%;
+      box-sizing: border-box;
       margin: 0 auto 1.5rem;
-      padding: 8px;
+      padding: 10px;
       font-size: 1rem;
       border-radius: 6px;
       border: 1px solid #aaa;
@@ -111,8 +112,9 @@
 
     .title {
       font-weight: bold;
-      font-size: 1.1rem;
-      margin-bottom: 5px;
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+      color: #222;
     }
 
     .comment {
@@ -131,6 +133,7 @@
         display: flex;
         gap: 20px;
         align-items: flex-start;
+        flex-wrap: wrap;
       }
 
       .image-wrapper {
@@ -219,6 +222,7 @@
 
         const id = `item-${index}`;
 
+        // 目次リンク
         const tocItem = document.createElement("li");
         const tocLink = document.createElement("a");
         tocLink.href = `#${id}`;
@@ -226,9 +230,16 @@
         tocItem.appendChild(tocLink);
         tocList.appendChild(tocItem);
 
+        // 本体表示
         const item = document.createElement("div");
         item.className = "file-item";
         item.id = id;
+
+        const content = document.createElement("div");
+
+        const titleEl = document.createElement("div");
+        titleEl.className = "title";
+        titleEl.textContent = file.title;
 
         const wrapper = document.createElement("div");
         wrapper.className = "image-wrapper";
@@ -248,12 +259,6 @@
         wrapper.appendChild(img);
         wrapper.appendChild(zoom);
 
-        const content = document.createElement("div");
-
-        const titleEl = document.createElement("div");
-        titleEl.className = "title";
-        titleEl.textContent = file.title;
-
         const audio = document.createElement("audio");
         audio.controls = true;
         audio.src = file.name;
@@ -263,10 +268,10 @@
         comment.textContent = "コメント：" + file.comment;
 
         content.appendChild(titleEl);
+        content.appendChild(wrapper);
         content.appendChild(audio);
         content.appendChild(comment);
 
-        item.appendChild(wrapper);
         item.appendChild(content);
         fileList.appendChild(item);
       });
