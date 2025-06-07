@@ -6,10 +6,10 @@
   <title>WAVファイル再生リスト</title>
 
   <!-- SEO -->
-  <meta name="description" content="自然環境音を収録したWAVファイルの再生リスト。鳥のさえずり、波の音、虫の声など。" />
+  <meta name="description" content="自然環境音のWAVファイルを再生。鳥の声、波の音などを高音質で。リラックスや瞑想に最適です。">
   <meta name="robots" content="index, follow" />
   <meta property="og:title" content="WAVファイル再生リスト" />
-  <meta property="og:description" content="自然環境音を収録したWAVファイル。リラックス効果のある音を集めました。" />
+  <meta property="og:description" content="自然環境音を収録したWAVファイルを聴くことができます。" />
   <meta property="og:type" content="website" />
   <meta property="og:locale" content="ja_JP" />
 
@@ -40,16 +40,35 @@
 
     #toc {
       margin-bottom: 2rem;
-      padding-left: 1rem;
+      overflow-x: auto;
     }
 
     #toc ul {
+      display: flex;
       list-style: none;
+      gap: 10px;
       padding: 0;
+      margin: 0;
+      white-space: nowrap;
     }
 
     #toc li {
-      margin-bottom: 4px;
+      flex-shrink: 0;
+    }
+
+    #toc a {
+      display: block;
+      padding: 6px 12px;
+      background: #fff;
+      border: 1px solid #aaa;
+      border-radius: 5px;
+      text-decoration: none;
+      color: #333;
+      font-size: 0.9rem;
+    }
+
+    #toc a:hover {
+      background: #cceeff;
     }
 
     .file-item {
@@ -88,6 +107,12 @@
     audio {
       width: 100%;
       margin-top: 10px;
+    }
+
+    .title {
+      font-weight: bold;
+      font-size: 1.1rem;
+      margin-bottom: 5px;
     }
 
     .comment {
@@ -144,16 +169,14 @@
 
   <h1>WAVファイル再生リスト</h1>
 
-  <input type="text" id="search" placeholder="キーワードで検索（例: 鳥、sound2）" />
+  <input type="text" id="search" placeholder="タイトル・コメントで検索（例: 鳥、波）" />
 
   <nav id="toc">
-    <h2>目次</h2>
     <ul id="toc-list"></ul>
   </nav>
 
   <div id="file-list"></div>
 
-  <!-- 拡大画像モーダル -->
   <div id="imageModal" class="modal" onclick="closeModal(event)">
     <img id="modalImage" src="" alt="拡大画像">
   </div>
@@ -163,16 +186,19 @@
       {
         name: "sound1.wav",
         image: "image1.jpg",
+        title: "鳥のさえずり",
         comment: "公園で録音した鳥のさえずりです。"
       },
       {
         name: "sound2.wav",
         image: "image2.jpg",
+        title: "波の音",
         comment: "海辺で録音した波の音です。"
       },
       {
         name: "sound3.wav",
         image: "image3.jpg",
+        title: "虫の声",
         comment: "夜の森で録音した虫の声です。"
       }
     ];
@@ -188,7 +214,7 @@
       tocList.innerHTML = "";
 
       files.forEach((file, index) => {
-        const match = (file.name + file.comment).toLowerCase().includes(filter.toLowerCase());
+        const match = (file.title + file.comment).toLowerCase().includes(filter.toLowerCase());
         if (!match) return;
 
         const id = `item-${index}`;
@@ -196,7 +222,7 @@
         const tocItem = document.createElement("li");
         const tocLink = document.createElement("a");
         tocLink.href = `#${id}`;
-        tocLink.textContent = file.name.replace(/\.\w+$/, "");
+        tocLink.textContent = file.title;
         tocItem.appendChild(tocLink);
         tocList.appendChild(tocItem);
 
@@ -209,7 +235,7 @@
 
         const img = document.createElement("img");
         img.src = file.image;
-        img.alt = file.name;
+        img.alt = file.title;
         img.onclick = () => {
           modalImg.src = file.image;
           modal.classList.add("show");
@@ -223,8 +249,10 @@
         wrapper.appendChild(zoom);
 
         const content = document.createElement("div");
-        const title = document.createElement("div");
-        title.textContent = file.name;
+
+        const titleEl = document.createElement("div");
+        titleEl.className = "title";
+        titleEl.textContent = file.title;
 
         const audio = document.createElement("audio");
         audio.controls = true;
@@ -234,7 +262,7 @@
         comment.className = "comment";
         comment.textContent = "コメント：" + file.comment;
 
-        content.appendChild(title);
+        content.appendChild(titleEl);
         content.appendChild(audio);
         content.appendChild(comment);
 
