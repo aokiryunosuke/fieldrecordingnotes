@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WAVファイル再生リスト</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
   <style>
@@ -9,29 +10,65 @@
       font-family: 'Noto Sans JP', sans-serif;
       padding: 20px;
       background: #d8f5d2;
+      margin: 0;
     }
+
     h1 {
       color: #333;
+      font-size: 1.8rem;
+      text-align: center;
+      margin-bottom: 2rem;
     }
+
     .file-item {
-      margin: 20px 0;
-      padding: 15px;
       background: #fff;
       border: 1px solid #ccc;
       border-radius: 10px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
+
     .file-item img {
       max-width: 100%;
+      height: auto;
       border-radius: 8px;
+      margin-bottom: 10px;
     }
+
+    .file-item div {
+      width: 100%;
+    }
+
+    .file-item audio {
+      width: 100%;
+      margin-top: 10px;
+    }
+
     .comment {
       margin-top: 10px;
       color: #555;
+      font-size: 0.95rem;
     }
-    audio {
-      width: 100%;
-      margin-top: 10px;
+
+    @media (min-width: 600px) {
+      .file-item {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 20px;
+      }
+
+      .file-item img {
+        max-width: 200px;
+        flex-shrink: 0;
+      }
+
+      .file-item div {
+        flex: 1;
+      }
     }
   </style>
 </head>
@@ -41,7 +78,6 @@
   <div id="file-list"></div>
 
   <script>
-    // WAVファイル情報（画像・コメント付き）
     const files = [
       {
         name: "sound1.wav",
@@ -70,6 +106,8 @@
       img.src = file.image;
       img.alt = file.name;
 
+      const content = document.createElement("div");
+
       const title = document.createElement("div");
       title.textContent = file.name;
 
@@ -81,10 +119,12 @@
       comment.className = "comment";
       comment.textContent = "コメント：" + file.comment;
 
+      content.appendChild(title);
+      content.appendChild(audio);
+      content.appendChild(comment);
+
       div.appendChild(img);
-      div.appendChild(title);
-      div.appendChild(audio);
-      div.appendChild(comment);
+      div.appendChild(content);
 
       container.appendChild(div);
     });
