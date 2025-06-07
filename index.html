@@ -4,6 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>WAVファイル再生リスト</title>
+
+  <!-- SEO対策 -->
+  <meta name="description" content="環境音を集めたWAVファイルの再生リスト。自然の音を聴いてリラックス。">
+  <meta name="robots" content="index, follow">
+  <meta property="og:title" content="WAVファイル再生リスト" />
+  <meta property="og:description" content="自然環境音を収録したWAVファイルを聴いてリラックス。鳥のさえずり、波の音など。" />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="ja_JP" />
+  <meta property="og:image" content="image1.jpg" />
+
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet" />
   <style>
     body {
@@ -30,7 +40,6 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      position: relative;
     }
 
     .image-wrapper {
@@ -63,8 +72,9 @@
       pointer-events: none;
     }
 
-    .file-item div {
-      width: 100%;
+    .comment {
+      margin-top: 10px;
+      color: #555;
     }
 
     audio {
@@ -72,9 +82,10 @@
       margin-top: 10px;
     }
 
-    .comment {
-      margin-top: 10px;
-      color: #555;
+    @media (max-width: 599px) {
+      .image-wrapper {
+        max-width: 60%;
+      }
     }
 
     @media (min-width: 600px) {
@@ -94,12 +105,6 @@
       }
     }
 
-    @media (max-width: 599px) {
-      .image-wrapper {
-        max-width: 80%;
-      }
-    }
-
     /* モーダル */
     .modal {
       display: none;
@@ -112,7 +117,6 @@
       background: rgba(0,0,0,0.9);
       justify-content: center;
       align-items: center;
-      flex-direction: column;
     }
 
     .modal.show {
@@ -124,25 +128,6 @@
       max-height: 80vh;
       border-radius: 10px;
     }
-
-    .modal-controls {
-      position: absolute;
-      width: 100%;
-      top: 50%;
-      transform: translateY(-50%);
-      display: flex;
-      justify-content: space-between;
-      pointer-events: none;
-    }
-
-    .modal-controls span {
-      font-size: 3rem;
-      color: white;
-      padding: 0 1rem;
-      cursor: pointer;
-      user-select: none;
-      pointer-events: auto;
-    }
   </style>
 </head>
 <body>
@@ -150,12 +135,8 @@
   <h1>WAVファイル再生リスト</h1>
   <div id="file-list"></div>
 
-  <!-- モーダル（画像＋スライド） -->
-  <div id="imageModal" class="modal">
-    <div class="modal-controls">
-      <span onclick="changeSlide(-1)">&#10094;</span>
-      <span onclick="changeSlide(1)">&#10095;</span>
-    </div>
+  <!-- 拡大モーダル -->
+  <div id="imageModal" class="modal" onclick="closeModal(event)">
     <img id="modalImage" src="" alt="拡大画像">
   </div>
 
@@ -169,8 +150,6 @@
     const container = document.getElementById("file-list");
     const modal = document.getElementById("imageModal");
     const modalImg = document.getElementById("modalImage");
-    let currentIndex = 0;
-    let touchStartX = 0;
 
     files.forEach((file, index) => {
       const div = document.createElement("div");
@@ -182,7 +161,10 @@
       const img = document.createElement("img");
       img.src = file.image;
       img.alt = file.name;
-      img.onclick = () => openModal(index);
+      img.onclick = () => {
+        modalImg.src = file.image;
+        modal.classList.add("show");
+      };
 
       const zoom = document.createElement("div");
       zoom.className = "zoom-icon";
@@ -212,47 +194,11 @@
       container.appendChild(div);
     });
 
-    function openModal(index) {
-      currentIndex = index;
-      modalImg.src = files[currentIndex].image;
-      modal.classList.add("show");
-    }
-
-    function changeSlide(direction) {
-      currentIndex = (currentIndex + direction + files.length) % files.length;
-      modalImg.src = files[currentIndex].image;
-    }
-
-    function closeModal() {
-      modal.classList.remove("show");
-    }
-
-    modal.addEventListener("click", e => {
-      if (e.target === modal) closeModal();
-    });
-
-    document.addEventListener("keydown", e => {
-      if (!modal.classList.contains("show")) return;
-      if (e.key === "Escape") closeModal();
-      if (e.key === "ArrowRight") changeSlide(1);
-      if (e.key === "ArrowLeft") changeSlide(-1);
-    });
-
-    modal.addEventListener("touchstart", e => {
-      touchStartX = e.changedTouches[0].screenX;
-    });
-
-    modal.addEventListener("touchend", e => {
-      const touchEndX = e.changedTouches[0].screenX;
-      const diff = touchEndX - touchStartX;
-      if (Math.abs(diff) > 50) {
-        if (diff > 0) {
-          changeSlide(-1);
-        } else {
-          changeSlide(1);
-        }
+    function closeModal(e) {
+      if (e.target === modal || e.target === modalImg) {
+        modal.classList.remove("show");
       }
-    });
+    }
   </script>
 
 </body>
