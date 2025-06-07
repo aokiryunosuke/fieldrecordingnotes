@@ -30,19 +30,37 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      position: relative;
     }
 
-    .file-item img {
+    .image-wrapper {
+      position: relative;
+      display: inline-block;
       max-width: 100%;
+    }
+
+    .image-wrapper img {
+      width: 100%;
       height: auto;
       border-radius: 8px;
-      margin-bottom: 10px;
       cursor: pointer;
       transition: transform 0.3s;
     }
 
-    .file-item img:hover {
+    .image-wrapper:hover img {
       transform: scale(1.02);
+    }
+
+    .zoom-icon {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      font-size: 1.2rem;
+      padding: 4px 6px;
+      border-radius: 4px;
+      pointer-events: none;
     }
 
     .file-item div {
@@ -66,13 +84,19 @@
         gap: 20px;
       }
 
-      .file-item img {
+      .image-wrapper {
         max-width: 200px;
         flex-shrink: 0;
       }
 
       .file-item div {
         flex: 1;
+      }
+    }
+
+    @media (max-width: 599px) {
+      .image-wrapper {
+        max-width: 80%;
       }
     }
 
@@ -146,21 +170,28 @@
     const modal = document.getElementById("imageModal");
     const modalImg = document.getElementById("modalImage");
     let currentIndex = 0;
-
-    // タッチ位置保存用
     let touchStartX = 0;
 
     files.forEach((file, index) => {
       const div = document.createElement("div");
       div.className = "file-item";
 
+      const wrapper = document.createElement("div");
+      wrapper.className = "image-wrapper";
+
       const img = document.createElement("img");
       img.src = file.image;
       img.alt = file.name;
       img.onclick = () => openModal(index);
 
-      const content = document.createElement("div");
+      const zoom = document.createElement("div");
+      zoom.className = "zoom-icon";
+      zoom.textContent = "🔍拡大";
 
+      wrapper.appendChild(img);
+      wrapper.appendChild(zoom);
+
+      const content = document.createElement("div");
       const title = document.createElement("div");
       title.textContent = file.name;
 
@@ -176,7 +207,7 @@
       content.appendChild(audio);
       content.appendChild(comment);
 
-      div.appendChild(img);
+      div.appendChild(wrapper);
       div.appendChild(content);
       container.appendChild(div);
     });
@@ -196,35 +227,4 @@
       modal.classList.remove("show");
     }
 
-    // 背景クリックでモーダル閉じる
-    modal.addEventListener("click", e => {
-      if (e.target === modal) closeModal();
-    });
-
-    // キーボード操作対応
-    document.addEventListener("keydown", e => {
-      if (!modal.classList.contains("show")) return;
-      if (e.key === "Escape") closeModal();
-      if (e.key === "ArrowRight") changeSlide(1);
-      if (e.key === "ArrowLeft") changeSlide(-1);
-    });
-
-    // スワイプ対応
-    modal.addEventListener("touchstart", e => {
-      touchStartX = e.changedTouches[0].screenX;
-    });
-
-    modal.addEventListener("touchend", e => {
-      const touchEndX = e.changedTouches[0].screenX;
-      const diff = touchEndX - touchStartX;
-      if (Math.abs(diff) > 50) {
-        if (diff > 0) {
-          changeSlide(-1); // 右スワイプ
-        } else {
-          changeSlide(1);  // 左スワイプ
-        }
-      }
-    });
-  </script>
-</body>
-</html>
+    mod
