@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>WAVファイル再生リスト</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f9f9f9;
+    }
+    h1 {
+      color: #333;
+    }
+    .file-item {
+      margin: 10px 0;
+      padding: 10px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    audio {
+      width: 100%;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>WAVファイル再生リスト</h1>
+  <div id="file-list"></div>
+
+  <script>
+    // WAVファイル名のリスト（拡張子含めて入力）
+    const wavFiles = [
+      "sound1.wav",
+      "sound2.wav",
+      "sound3.wav"
+    ];
+
+    const container = document.getElementById("file-list");
+
+    wavFiles.forEach(file => {
+      const div = document.createElement("div");
+      div.className = "file-item";
+
+      const title = document.createElement("div");
+      title.textContent = file;
+
+      const audio = document.createElement("audio");
+      audio.controls = true;
+      audio.src = file;
+
+      div.appendChild(title);
+      div.appendChild(audio);
+      container.appendChild(div);
+    });
+  </script>
+
+</body>
+</html>
