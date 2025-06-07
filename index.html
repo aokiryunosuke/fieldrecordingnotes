@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WAVファイル再生リスト</title>
+  <title>フィールドレコーディングノート</title>
 
   <!-- SEO -->
-  <meta name="description" content="自然環境音のWAVファイルを再生。鳥の声、波の音などを高音質で。リラックスや瞑想に最適です。">
+  <meta name="description" content="自然環境音のWAVファイルを再生。鳥の声、波の音などを高音質で。リラックスや瞑想に最適なフィールドレコーディングノート。">
   <meta name="robots" content="index, follow" />
-  <meta property="og:title" content="WAVファイル再生リスト" />
-  <meta property="og:description" content="自然環境音を収録したWAVファイル。リラックス効果のある音を集めました。" />
+  <meta property="og:title" content="フィールドレコーディングノート" />
+  <meta property="og:description" content="自然環境音を収録したWAVファイル。リラックス効果のある音を集めた録音ノート。" />
   <meta property="og:type" content="website" />
   <meta property="og:locale" content="ja_JP" />
 
@@ -17,9 +17,11 @@
   <style>
     body {
       font-family: 'Noto Sans JP', sans-serif;
-      background: #d8f5d2;
       margin: 0;
       padding: 20px;
+      background-color: #b3e5fc;
+      background-image: radial-gradient(white 10%, transparent 11%);
+      background-size: 20px 20px;
     }
 
     h1 {
@@ -170,7 +172,7 @@
 </head>
 <body>
 
-  <h1>WAVファイル再生リスト</h1>
+  <h1>フィールドレコーディングノート</h1>
 
   <input type="text" id="search" placeholder="タイトル・コメントで検索（例: 鳥、波）" />
 
@@ -222,7 +224,6 @@
 
         const id = `item-${index}`;
 
-        // 目次リンク
         const tocItem = document.createElement("li");
         const tocLink = document.createElement("a");
         tocLink.href = `#${id}`;
@@ -230,7 +231,6 @@
         tocItem.appendChild(tocLink);
         tocList.appendChild(tocItem);
 
-        // 本体表示
         const item = document.createElement("div");
         item.className = "file-item";
         item.id = id;
