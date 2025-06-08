@@ -62,13 +62,14 @@
     }
 
     .image-wrapper {
-      position: relative;
-      display: inline-block;
-      max-width: 100%;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
     }
 
     .image-wrapper img {
-      width: 100%;
+      width: 100px;
       border-radius: 8px;
       cursor: pointer;
     }
@@ -88,7 +89,6 @@
     audio {
       width: 100%;
       margin-top: 10px;
-      border-radius: 5px;
     }
 
     .title {
@@ -96,6 +96,8 @@
       font-size: 1.2rem;
       margin-bottom: 8px;
       color: #222;
+      cursor: pointer;
+      text-decoration: underline;
     }
 
     .comment {
@@ -104,26 +106,8 @@
     }
 
     @media (max-width: 599px) {
-      .image-wrapper {
-        max-width: 60%;
-      }
-    }
-
-    @media (min-width: 600px) {
-      .file-item {
-        display: flex;
-        gap: 20px;
-        align-items: flex-start;
-        flex-wrap: wrap;
-      }
-
-      .image-wrapper {
-        max-width: 160px;
-        flex-shrink: 0;
-      }
-
-      .file-item div {
-        flex: 1;
+      .image-wrapper img {
+        width: 60px;
       }
     }
 
@@ -182,7 +166,7 @@
     const files = [
       {
         name: "sound1.wav",
-        image: "image1.jpg",
+        images: ["image1.jpg", "image1b.jpg"],
         title: "鳥のさえずり",
         comment: "公園で録音した鳥のさえずりです。",
         lat: 35.6895,
@@ -190,7 +174,7 @@
       },
       {
         name: "sound2.wav",
-        image: "image2.jpg",
+        images: ["image2.jpg"],
         title: "波の音",
         comment: "海辺で録音した波の音です。",
         lat: 35.3000,
@@ -198,7 +182,7 @@
       },
       {
         name: "sound3.wav",
-        image: "image3.jpg",
+        images: ["image3.jpg"],
         title: "虫の声",
         comment: "夜の森で録音した虫の声です。",
         lat: 36.2048,
@@ -229,24 +213,20 @@
         const titleEl = document.createElement("div");
         titleEl.className = "title";
         titleEl.textContent = file.title;
+        titleEl.onclick = () => map.setView([file.lat, file.lng], 10);
 
         const wrapper = document.createElement("div");
         wrapper.className = "image-wrapper";
-
-        const img = document.createElement("img");
-        img.src = file.image;
-        img.alt = file.title;
-        img.onclick = () => {
-          modalImg.src = file.image;
-          modal.classList.add("show");
-        };
-
-        const zoom = document.createElement("div");
-        zoom.className = "zoom-icon";
-        zoom.textContent = "🔍拡大";
-
-        wrapper.appendChild(img);
-        wrapper.appendChild(zoom);
+        file.images.forEach(imgSrc => {
+          const img = document.createElement("img");
+          img.src = imgSrc;
+          img.alt = file.title;
+          img.onclick = () => {
+            modalImg.src = imgSrc;
+            modal.classList.add("show");
+          };
+          wrapper.appendChild(img);
+        });
 
         const audio = document.createElement("audio");
         audio.controls = true;
@@ -288,13 +268,10 @@
         const id = `item-${index}`;
         const marker = L.marker([file.lat, file.lng]).addTo(map);
         marker.bindPopup(`
-          <div style="font-size:0.9rem; line-height:1.4;">
-            <strong>${file.title}</strong><br>
-            <img src="${file.image}" alt="${file.title}" style="width:100px; border-radius:6px; margin-top:5px;"><br>
-            <audio controls src="${file.name}" style="width:100%; margin-top:5px; border-radius:4px;"></audio><br>
-            <small style="display:block; margin-top:5px; color:#333;">${file.comment}</small>
-            <button onclick="document.getElementById('${id}').scrollIntoView({ behavior: 'smooth' });" style="margin-top:6px; padding:4px 8px; font-size:0.8rem; background:#444; color:#fff; border:none; border-radius:4px; cursor:pointer;">詳細へ移動</button>
-          </div>
+          <strong>${file.title}</strong><br>
+          <audio controls src="${file.name}" style="width:100%; margin-top:5px;"></audio><br>
+          <small>${file.comment}</small><br>
+          <button onclick="document.getElementById('${id}').scrollIntoView({ behavior: 'smooth' });">詳細へ移動</button>
         `);
       }
     });
