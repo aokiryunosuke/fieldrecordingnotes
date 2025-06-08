@@ -70,21 +70,9 @@
 
     .image-wrapper img {
       width: 100px;
-      border-radius: 0;
       cursor: pointer;
       position: relative;
-    }
-
-    .image-wrapper img::after {
-      content: '🔍';
-      position: absolute;
-      top: 5px;
-      right: 5px;
-      background: rgba(0,0,0,0.6);
-      color: white;
-      padding: 2px 4px;
-      font-size: 0.8rem;
-      border-radius: 4px;
+      border-radius: 0;
     }
 
     audio {
@@ -275,13 +263,45 @@
       if (file.lat && file.lng) {
         const id = `item-${index}`;
         const marker = L.marker([file.lat, file.lng]).addTo(map);
-        marker.bindPopup(`
-          <strong>${file.title}</strong><br>
-          <img src="${file.images[0]}" alt="${file.title}" style="width:100px; margin-top:5px;"><br>
-          <audio controls src="${file.name}" style="width:100%; margin-top:5px;"></audio><br>
-          <small>${file.comment}</small><br>
-          <button onclick="document.getElementById('${id}').scrollIntoView({ behavior: 'smooth' });">詳細へ移動</button>
-        `);
+        const popupContent = document.createElement("div");
+        const title = document.createElement("strong");
+        title.textContent = file.title;
+        popupContent.appendChild(title);
+        popupContent.appendChild(document.createElement("br"));
+
+        const img = document.createElement("img");
+        img.src = file.images[0];
+        img.style.width = "100px";
+        img.style.marginTop = "5px";
+        img.style.cursor = "pointer";
+        img.onclick = () => {
+          modalImg.src = img.src;
+          modal.classList.add("show");
+        };
+        popupContent.appendChild(img);
+        popupContent.appendChild(document.createElement("br"));
+
+        const audio = document.createElement("audio");
+        audio.controls = true;
+        audio.src = file.name;
+        audio.style.width = "100%";
+        audio.style.marginTop = "5px";
+        popupContent.appendChild(audio);
+        popupContent.appendChild(document.createElement("br"));
+
+        const comment = document.createElement("small");
+        comment.textContent = file.comment;
+        popupContent.appendChild(comment);
+        popupContent.appendChild(document.createElement("br"));
+
+        const button = document.createElement("button");
+        button.textContent = "詳細へ移動";
+        button.onclick = () => {
+          document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        };
+        popupContent.appendChild(button);
+
+        marker.bindPopup(popupContent);
         markers.push(marker);
       } else {
         markers.push(null);
