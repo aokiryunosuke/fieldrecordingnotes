@@ -74,18 +74,6 @@
       cursor: pointer;
     }
 
-    .zoom-icon {
-      position: absolute;
-      bottom: 8px;
-      right: 8px;
-      background: rgba(0, 0, 0, 0.6);
-      color: white;
-      font-size: 0.9rem;
-      padding: 2px 5px;
-      border-radius: 4px;
-      pointer-events: none;
-    }
-
     audio {
       width: 100%;
       margin-top: 10px;
@@ -95,7 +83,7 @@
       font-weight: bold;
       font-size: 1.2rem;
       margin-bottom: 8px;
-      color: #222;
+      color: #0066cc;
       cursor: pointer;
       text-decoration: underline;
     }
@@ -195,6 +183,8 @@
     const modal = document.getElementById("imageModal");
     const modalImg = document.getElementById("modalImage");
 
+    const markers = [];
+
     function renderList(filter = "") {
       fileList.innerHTML = "";
 
@@ -213,7 +203,10 @@
         const titleEl = document.createElement("div");
         titleEl.className = "title";
         titleEl.textContent = file.title;
-        titleEl.onclick = () => map.setView([file.lat, file.lng], 10);
+        titleEl.onclick = () => {
+          map.setView([file.lat, file.lng], 10);
+          markers[index].openPopup();
+        };
 
         const wrapper = document.createElement("div");
         wrapper.className = "image-wrapper";
@@ -269,10 +262,14 @@
         const marker = L.marker([file.lat, file.lng]).addTo(map);
         marker.bindPopup(`
           <strong>${file.title}</strong><br>
+          <img src="${file.images[0]}" alt="${file.title}" style="width:100px; border-radius:6px; margin-top:5px;"><br>
           <audio controls src="${file.name}" style="width:100%; margin-top:5px;"></audio><br>
           <small>${file.comment}</small><br>
           <button onclick="document.getElementById('${id}').scrollIntoView({ behavior: 'smooth' });">詳細へ移動</button>
         `);
+        markers.push(marker);
+      } else {
+        markers.push(null);
       }
     });
   </script>
