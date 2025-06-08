@@ -70,8 +70,21 @@
 
     .image-wrapper img {
       width: 100px;
-      border-radius: 8px;
+      border-radius: 0;
       cursor: pointer;
+      position: relative;
+    }
+
+    .image-wrapper img::after {
+      content: '🔍';
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: rgba(0,0,0,0.6);
+      color: white;
+      padding: 2px 4px;
+      font-size: 0.8rem;
+      border-radius: 4px;
     }
 
     audio {
@@ -117,7 +130,7 @@
     .modal img {
       max-width: 90%;
       max-height: 80vh;
-      border-radius: 10px;
+      border-radius: 0;
     }
 
     #topButton {
@@ -136,6 +149,7 @@
 </head>
 <body>
 
+  <a id="top"></a>
   <h1>フィールドレコーディングノート</h1>
 
   <input type="text" id="search" placeholder="タイトル・コメントで検索（例: 鳥、波）" />
@@ -204,6 +218,7 @@
         titleEl.className = "title";
         titleEl.textContent = file.title;
         titleEl.onclick = () => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
           map.setView([file.lat, file.lng], 10);
           markers[index].openPopup();
         };
@@ -262,7 +277,7 @@
         const marker = L.marker([file.lat, file.lng]).addTo(map);
         marker.bindPopup(`
           <strong>${file.title}</strong><br>
-          <img src="${file.images[0]}" alt="${file.title}" style="width:100px; border-radius:6px; margin-top:5px;"><br>
+          <img src="${file.images[0]}" alt="${file.title}" style="width:100px; margin-top:5px;"><br>
           <audio controls src="${file.name}" style="width:100%; margin-top:5px;"></audio><br>
           <small>${file.comment}</small><br>
           <button onclick="document.getElementById('${id}').scrollIntoView({ behavior: 'smooth' });">詳細へ移動</button>
