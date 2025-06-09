@@ -194,13 +194,14 @@ audio {
 @media (max-width: 599px) {
   .image-wrapper img {
     width: 60px;
-    height: auto;           /* ← 追加：モバイルでも比率保持 */
-    object-fit: contain;    /* ← 同上 */
+    height: auto;
+    object-fit: contain;
   }
 
   #summaryButton {
-    top: 10px;
-    right: 10px;
+    position: absolute;
+    top: 78px;       /* 検索欄の上に合わせる（適宜微調整） */
+    right: 20px;
     padding: 6px 10px;
     font-size: 0.85rem;
   }
@@ -208,12 +209,13 @@ audio {
   #summaryBox {
     width: 90%;
     right: 5%;
-    top: 50px;
+    top: 150px;      /* ボタンより少し下に出す */
     max-height: 70vh;
     font-size: 0.9rem;
     padding: 14px 12px 10px 12px;
   }
 }
+
 
   </style>
 </head>
