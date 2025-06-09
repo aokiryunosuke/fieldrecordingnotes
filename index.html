@@ -6,10 +6,10 @@
   <title>Field Recording Notes</title>
 
   <!-- SEO -->
-  <meta name="description" content="青木隆之助によるフィールドレコーディングのデータ集">
+  <meta name="description" content="フィールドレコーディングのデータ集">
   <meta name="robots" content="index, follow" />
   <meta property="og:title" content="フィールドレコーディングノート" />
-  <meta property="og:description" content="青木隆之助によるフィールドレコーディングのデータ集" />
+  <meta property="og:description" content="フィールドレコーディングのデータ集" />
   <meta property="og:type" content="website" />
   <meta property="og:locale" content="ja_JP" />
 
@@ -136,7 +136,6 @@
   </style>
 </head>
 <body>
-
   <a id="top"></a>
   <h1>Field Recording Notes</h1>
 
@@ -153,8 +152,7 @@
   </div>
 
   <script>
-    const files = [
-      {
+    const files = [{
         name: "20250608_1.wav",
         images: ["20250608_1_1.jpg", "20250608_1_2.jpg"],
         title: "20250608_1",
@@ -224,8 +222,14 @@
     const searchInput = document.getElementById("search");
     const modal = document.getElementById("imageModal");
     const modalImg = document.getElementById("modalImage");
-
     const markers = [];
+
+    function pauseAllAudio() {
+      document.querySelectorAll("audio").forEach(audio => {
+        audio.pause();
+        audio.currentTime = 0;
+      });
+    }
 
     function renderList(filter = "") {
       fileList.innerHTML = "";
@@ -267,6 +271,7 @@
         const audio = document.createElement("audio");
         audio.controls = true;
         audio.src = file.name;
+        audio.addEventListener("play", pauseAllAudio);
 
         const comment = document.createElement("div");
         comment.className = "comment";
@@ -326,6 +331,7 @@
         audio.src = file.name;
         audio.style.width = "100%";
         audio.style.marginTop = "5px";
+        audio.addEventListener("play", pauseAllAudio);
         popupContent.appendChild(audio);
         popupContent.appendChild(document.createElement("br"));
 
