@@ -13,10 +13,10 @@
   <link rel="apple-touch-icon" href="/fieldrecordingnotes/サウンドスケープサイコロジー研究室ロゴ縁あり-apple.png" />
 
   <!-- SEO -->
-  <meta name="description" content="青木隆之助によるフィールドレコーディングのデータ集">
+  <meta name="description" content="フィールドレコーディングのデータ集">
   <meta name="robots" content="index, follow" />
-  <meta property="og:title" content="フィールドレコーディングノート" />
-  <meta property="og:description" content="青木隆之助によるフィールドレコーディングのデータ集" />
+  <meta property="og:title" content="Field Recording Notes" />
+  <meta property="og:description" content="フィールドレコーディングのデータ集" />
   <meta property="og:type" content="website" />
   <meta property="og:locale" content="ja_JP" />
 
@@ -141,8 +141,55 @@
       z-index: 1001;
     }
   </style>
+
+  <style>
+  #summaryButton {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #0066cc;
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    z-index: 1002;
+  }
+
+  #summaryBox {
+    display: none;
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    width: 300px;
+    max-height: 70vh;
+    overflow-y: auto;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    z-index: 1002;
+  }
+
+  @media (max-width: 599px) {
+    #summaryBox {
+      width: 90%;
+      right: 5%;
+    }
+  }
+</style>
+
 </head>
 <body>
+  
+  <button id="summaryButton">概要</button>
+<div id="summaryBox">
+  <p><strong>このサイトについて：</strong></p>
+  <p>このページは青木隆之助によるフィールドレコーディングの記録集です。各録音に場所、写真、音声、コメントが紐付いており、マップと連携して閲覧できます。</p>
+</div>
+
   <script>
     document.addEventListener('play', function(e){
       const audios = document.getElementsByTagName('audio');
@@ -311,6 +358,14 @@
     });
 
     renderList();
+
+    const summaryBtn = document.getElementById("summaryButton");
+const summaryBox = document.getElementById("summaryBox");
+
+summaryBtn.addEventListener("click", () => {
+  summaryBox.style.display = summaryBox.style.display === "block" ? "none" : "block";
+});
+
 
     const map = L.map('map').setView([36.2, 138.2], 6);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
