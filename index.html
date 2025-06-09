@@ -140,56 +140,72 @@
       cursor: pointer;
       z-index: 1001;
     }
-  </style>
 
-  <style>
+     /* 概要ボタン */
   #summaryButton {
     position: fixed;
-    top: 20px;
-    right: 20px;
+    top: 10px;
+    right: 10px;
     background-color: #0066cc;
     color: white;
     border: none;
-    padding: 10px 14px;
-    border-radius: 6px;
-    font-size: 0.9rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
     cursor: pointer;
     z-index: 1002;
   }
 
+  /* 概要ボックス */
   #summaryBox {
     display: none;
     position: fixed;
-    top: 70px;
-    right: 20px;
-    width: 300px;
-    max-height: 70vh;
+    top: 40px;
+    right: 10px;
+    width: 280px;
+    max-height: 60vh;
     overflow-y: auto;
     background-color: white;
     border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 15px;
+    border-radius: 6px;
+    padding: 12px 10px 10px 10px;
+    font-size: 0.8rem;
+    line-height: 1.4;
     box-shadow: 0 2px 6px rgba(0,0,0,0.3);
     z-index: 1002;
+    box-sizing: border-box;
   }
 
+  /* 閉じるボタン */
+  #closeSummary {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    background: none;
+    border: none;
+    font-size: 1rem;
+    color: #888;
+    cursor: pointer;
+  }
+
+  #closeSummary:hover {
+    color: #000;
+  }
+
+  /* モバイル対応 */
   @media (max-width: 599px) {
     #summaryBox {
       width: 90%;
       right: 5%;
+      top: 50px;
+      max-height: 70vh;
+      font-size: 0.9rem;
+      padding: 14px 12px 10px 12px;
     }
   }
-</style>
-
+  </style>
 </head>
 <body>
-  
-  <button id="summaryButton">概要</button>
-<div id="summaryBox">
-  <p><strong>このサイトについて：</strong></p>
-  <p>このページは青木隆之助によるフィールドレコーディングの記録集です。各録音に場所、写真、音声、コメントが紐付いており、マップと連携して閲覧できます。</p>
-</div>
-
   <script>
     document.addEventListener('play', function(e){
       const audios = document.getElementsByTagName('audio');
@@ -204,6 +220,16 @@
 
   <a id="top"></a>
   <h1>Field Recording Notes</h1>
+
+  <!-- 概要ボタン -->
+<button id="summaryButton">概要</button>
+
+<!-- 概要ボックス -->
+<div id="summaryBox">
+  <button id="closeSummary" aria-label="閉じる">×</button>
+  <p><strong>このサイトについて：</strong></p>
+  <p>このページは青木隆之助によるフィールドレコーディングの記録集です。各録音に場所、写真、音声、コメントが紐付いており、マップと連携して閲覧できます。</p>
+</div>
 
   <input type="text" id="search" placeholder="検索（例: 250608_0026、三戸浜、鳥）" />
 
@@ -359,11 +385,29 @@
 
     renderList();
 
-    const summaryBtn = document.getElementById("summaryButton");
+    // === 概要表示の要素取得 ===
+const summaryBtn = document.getElementById("summaryButton");
 const summaryBox = document.getElementById("summaryBox");
+const closeSummary = document.getElementById("closeSummary");
 
-summaryBtn.addEventListener("click", () => {
-  summaryBox.style.display = summaryBox.style.display === "block" ? "none" : "block";
+// === ボタンで開閉 ===
+function toggleSummary() {
+  const isVisible = summaryBox.style.display === "block";
+  summaryBox.style.display = isVisible ? "none" : "block";
+}
+summaryBtn.addEventListener("click", toggleSummary);
+
+// === ×ボタンで閉じる ===
+closeSummary.addEventListener("click", () => {
+  summaryBox.style.display = "none";
+});
+
+// === ボックス外をクリックしたら閉じる ===
+document.addEventListener("click", (event) => {
+  const isInside = summaryBox.contains(event.target) || summaryBtn.contains(event.target);
+  if (!isInside) {
+    summaryBox.style.display = "none";
+  }
 });
 
 
