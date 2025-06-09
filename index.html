@@ -142,10 +142,19 @@
     }
 
      /* 概要ボタン */
-  #summaryButton {
-  position: fixed;
-  bottom: 70px;
-  right: 20px;
+ /* h1と概要ボタンを横に並べるための親コンテナ */
+.header-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;  /* 中央に配置 */
+  gap: 10px;                /* タイトルとボタンの隙間 */
+  flex-wrap: wrap;          /* スマホでは自動で改行 */
+  margin-bottom: 1rem;
+}
+
+/* 概要ボタンのスタイル */
+#summaryButton {
+  position: static;         /* 固定表示を解除 */
   background-color: #0066cc;
   color: white;
   border: none;
@@ -153,9 +162,7 @@
   border-radius: 4px;
   font-size: 0.7rem;
   cursor: pointer;
-  z-index: 1002;
 }
-
 
   /* 概要ボックス */
   #summaryBox {
@@ -220,10 +227,10 @@
   </script>
 
   <a id="top"></a>
+ <div class="header-wrapper">
   <h1>Field Recording Notes</h1>
-
-  <!-- 概要ボタン -->
-<button id="summaryButton">概要</button>
+  <button id="summaryButton">概要</button>
+</div>
 
 <!-- 概要ボックス -->
 <div id="summaryBox">
