@@ -297,11 +297,6 @@
         popupContent.appendChild(audio);
         popupContent.appendChild(document.createElement("br"));
 
-        const comment = document.createElement("small");
-        comment.textContent = file.comment;
-        popupContent.appendChild(comment);
-        popupContent.appendChild(document.createElement("br"));
-
         const button = document.createElement("button");
         button.textContent = "詳細へ移動";
         button.onclick = () => {
