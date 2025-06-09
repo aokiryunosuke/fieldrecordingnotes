@@ -146,23 +146,25 @@
 .header-wrapper {
   display: flex;
   align-items: center;
-  justify-content: center;  /* 中央に配置 */
-  gap: 10px;                /* タイトルとボタンの隙間 */
-  flex-wrap: wrap;          /* スマホでは自動で改行 */
-  margin-bottom: 1rem;
+  justify-content: space-between; /* ← タイトル中央＋ボタン右寄せ */
+  max-width: 800px;
+  margin: 0 auto 1rem auto; /* ← 中央寄せ */
+  padding: 0 1rem;
 }
+
 
 /* 概要ボタンのスタイル */
 #summaryButton {
-  position: static;         /* 固定表示を解除 */
+  position: static;
   background-color: #0066cc;
   color: white;
   border: none;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.7rem;
+  padding: 8px 12px;        /* ⬅ 少し大きく */
+  border-radius: 5px;
+  font-size: 0.9rem;        /* ⬅ 大きめの文字 */
   cursor: pointer;
 }
+
 
   /* 概要ボックス */
   #summaryBox {
