@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Field Recording Notes</title>
+  <title>フィールドレコーディングノート</title>
 
   <!-- SEO -->
-  <meta name="description" content="青木隆之助によるフィールドレコーディングのデータ集">
+  <meta name="description" content="自然環境音のWAVファイルを再生。鳥の声、波の音などを高音質で。リラックスや瞑想に最適なフィールドレコーディングノート。">
   <meta name="robots" content="index, follow" />
   <meta property="og:title" content="フィールドレコーディングノート" />
-  <meta property="og:description" content="青木隆之助によるフィールドレコーディングのデータ集" />
+  <meta property="og:description" content="自然環境音を収録したWAVファイル。リラックス効果のある音を集めた録音ノート。" />
   <meta property="og:type" content="website" />
   <meta property="og:locale" content="ja_JP" />
 
@@ -138,9 +138,9 @@
 <body>
 
   <a id="top"></a>
-  <h1>Field Recording Notes</h1>
+  <h1>フィールドレコーディングノート</h1>
 
-  <input type="text" id="search" placeholder="検索（例: 250608_0026、三戸浜、鳥）" />
+  <input type="text" id="search" placeholder="タイトル・コメントで検索（例: 鳥、波）" />
 
   <div id="map"></div>
 
@@ -185,136 +185,10 @@
         comment: "神奈川県三浦市南下浦町菊名付近。15:50、小雨。小雨がぽつぽつ降っている。三浦海岸から坂をのぼったところにある。上に葉々があり、雨よけになった。葉々が雨によってなっている。三浦海岸で車が走っている音がきこえる。ポツンとどこでもない場所から、広い周りの音を聞いているという印象である。",
         lat: 35.1781197,
         lng: 139.6527673
-      },
+      }
     ];
 
-    const fileList = document.getElementById("file-list");
-    const searchInput = document.getElementById("search");
-    const modal = document.getElementById("imageModal");
-    const modalImg = document.getElementById("modalImage");
-
-    const markers = [];
-
-    function renderList(filter = "") {
-      fileList.innerHTML = "";
-
-      files.forEach((file, index) => {
-        const match = (file.title + file.comment).toLowerCase().includes(filter.toLowerCase());
-        if (!match) return;
-
-        const id = `item-${index}`;
-
-        const item = document.createElement("div");
-        item.className = "file-item";
-        item.id = id;
-
-        const content = document.createElement("div");
-
-        const titleEl = document.createElement("div");
-        titleEl.className = "title";
-        titleEl.textContent = file.title;
-        titleEl.onclick = () => {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-          map.setView([file.lat, file.lng], 10);
-          markers[index].openPopup();
-        };
-
-        const wrapper = document.createElement("div");
-        wrapper.className = "image-wrapper";
-        file.images.forEach(imgSrc => {
-          const img = document.createElement("img");
-          img.src = imgSrc;
-          img.alt = file.title;
-          img.onclick = () => {
-            modalImg.src = imgSrc;
-            modal.classList.add("show");
-          };
-          wrapper.appendChild(img);
-        });
-
-        const audio = document.createElement("audio");
-        audio.controls = true;
-        audio.src = file.name;
-
-        const comment = document.createElement("div");
-        comment.className = "comment";
-        comment.textContent = file.comment;
-
-        content.appendChild(titleEl);
-        content.appendChild(wrapper);
-        content.appendChild(audio);
-        content.appendChild(comment);
-
-        item.appendChild(content);
-        fileList.appendChild(item);
-      });
-    }
-
-    function closeModal(e) {
-      if (e.target === modal || e.target === modalImg) {
-        modal.classList.remove("show");
-      }
-    }
-
-    searchInput.addEventListener("input", () => {
-      renderList(searchInput.value);
-    });
-
-    renderList();
-
-    const map = L.map('map').setView([36.2, 138.2], 6);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
-    files.forEach((file, index) => {
-      if (file.lat && file.lng) {
-        const id = `item-${index}`;
-        const marker = L.marker([file.lat, file.lng]).addTo(map);
-        const popupContent = document.createElement("div");
-        const title = document.createElement("strong");
-        title.textContent = file.title;
-        popupContent.appendChild(title);
-        popupContent.appendChild(document.createElement("br"));
-
-        const img = document.createElement("img");
-        img.src = file.images[0];
-        img.style.width = "100px";
-        img.style.marginTop = "5px";
-        img.style.cursor = "pointer";
-        img.onclick = () => {
-          modalImg.src = img.src;
-          modal.classList.add("show");
-        };
-        popupContent.appendChild(img);
-        popupContent.appendChild(document.createElement("br"));
-
-        const audio = document.createElement("audio");
-        audio.controls = true;
-        audio.src = file.name;
-        audio.style.width = "100%";
-        audio.style.marginTop = "5px";
-        popupContent.appendChild(audio);
-        popupContent.appendChild(document.createElement("br"));
-
-        const comment = document.createElement("small");
-        comment.textContent = file.comment;
-        popupContent.appendChild(comment);
-        popupContent.appendChild(document.createElement("br"));
-
-        const button = document.createElement("button");
-        button.textContent = "詳細へ移動";
-        button.onclick = () => {
-          document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
-        };
-        popupContent.appendChild(button);
-
-        marker.bindPopup(popupContent);
-        markers.push(marker);
-      } else {
-        markers.push(null);
-      }
-    });
+    // JavaScriptによる動的レンダリング、検索、地図表示処理をここに追記します
   </script>
 </body>
 </html>
