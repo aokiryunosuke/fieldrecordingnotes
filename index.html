@@ -27,114 +27,12 @@
 
   <style>
    
-    #search {
-      width: 100%;
-      box-sizing: border-box;
-      margin: 0 auto 1.5rem;
-      padding: 10px;
-      font-size: 1rem;
-      border-radius: 6px;
-      border: 1px solid #aaa;
-      display: block;
-    }
-
-    #map {
-      height: 400px;
-      width: 100%;
-      margin-bottom: 2rem;
-      border: 2px solid #888;
-      border-radius: 8px;
-    }
-
-    .file-item {
-      background: #fff;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      padding: 15px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-
-    .image-wrapper {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 10px;
-    }
-
-    .image-wrapper img {
-      width: 100px;
-      cursor: pointer;
-      position: relative;
-      border-radius: 0;
-    }
-
-    audio {
-      width: 100%;
-      margin-top: 10px;
-    }
-
-    .title {
-      font-weight: bold;
-      font-size: 1.2rem;
-      margin-bottom: 8px;
-      color: #0066cc;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-
-    .comment {
-      margin-top: 8px;
-      color: #555;
-    }
-
-    @media (max-width: 599px) {
-      .image-wrapper img {
-        width: 60px;
-      }
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: rgba(0, 0, 0, 0.9);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-
-    .modal.show {
-      display: flex;
-    }
-
-    .modal img {
-      max-width: 90%;
-      max-height: 80vh;
-      border-radius: 0;
-    }
-
-    #topButton {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background-color: #444;
-      color: white;
-      padding: 10px 15px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      z-index: 1001;
-    }
-
-     /* 概要ボタン */
- body {
+body {
   font-family: 'Noto Sans JP', sans-serif;
   margin: 0;
   padding: 20px;
   background-color: #e0e0d1;
-  position: relative; /* ボタンを絶対位置で配置するために必要 */
+  position: relative; /* ボタンの絶対配置に必要 */
 }
 
 h1 {
@@ -142,25 +40,111 @@ h1 {
   margin-bottom: 1rem;
   font-size: 1rem;
   font-weight: 400;
-  position: relative; /* 概要ボタンをこの上に重ねるために必要 */
+  position: relative; /* 概要ボタンを重ねるために必要 */
 }
 
-@media (max-width: 599px) {
-  #summaryButton {
-    top: 10px;
-    right: 10px;
-    padding: 6px 10px;
-    font-size: 0.85rem;
-  }
+#search {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 auto 1.5rem;
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #aaa;
+  display: block;
 }
 
+#map {
+  height: 400px;
+  width: 100%;
+  margin-bottom: 2rem;
+  border: 2px solid #888;
+  border-radius: 8px;
+}
 
+.file-item {
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
 
-/* 概要ボタンのスタイル */
+.image-wrapper {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.image-wrapper img {
+  width: 100px;
+  height: auto;               /* ← 追加：比率を保つ */
+  object-fit: contain;        /* ← 追加：切り取り防止 */
+  cursor: pointer;
+  position: relative;
+  border-radius: 0;
+}
+
+audio {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.title {
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+  color: #0066cc;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.comment {
+  margin-top: 8px;
+  color: #555;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.9);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal.show {
+  display: flex;
+}
+
+.modal img {
+  max-width: 90%;
+  max-height: 80vh;
+  border-radius: 0;
+}
+
+#topButton {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #444;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  z-index: 1001;
+}
+
+/* 概要ボタン */
 #summaryButton {
   position: absolute;
-  top: 20px;        /* ページ上部からの距離 */
-  right: 20px;      /* 右端からの距離 */
+  top: 20px;
+  right: 20px;
   background-color: #0066cc;
   color: white;
   border: none;
@@ -171,54 +155,66 @@ h1 {
   z-index: 1001;
 }
 
+/* 概要ボックス */
+#summaryBox {
+  display: none;
+  position: fixed;
+  top: 40px;
+  right: 10px;
+  width: 280px;
+  max-height: 60vh;
+  overflow-y: auto;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 12px 10px 10px 10px;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  z-index: 1002;
+  box-sizing: border-box;
+}
 
-  /* 概要ボックス */
-  #summaryBox {
-    display: none;
-    position: fixed;
-    top: 40px;
+/* 閉じるボタン */
+#closeSummary {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: #888;
+  cursor: pointer;
+}
+#closeSummary:hover {
+  color: #000;
+}
+
+/* モバイル対応 */
+@media (max-width: 599px) {
+  .image-wrapper img {
+    width: 60px;
+    height: auto;           /* ← 追加：モバイルでも比率保持 */
+    object-fit: contain;    /* ← 同上 */
+  }
+
+  #summaryButton {
+    top: 10px;
     right: 10px;
-    width: 280px;
-    max-height: 60vh;
-    overflow-y: auto;
-    background-color: white;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    padding: 12px 10px 10px 10px;
-    font-size: 0.8rem;
-    line-height: 1.4;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    z-index: 1002;
-    box-sizing: border-box;
+    padding: 6px 10px;
+    font-size: 0.85rem;
   }
 
-  /* 閉じるボタン */
-  #closeSummary {
-    position: absolute;
-    top: 4px;
-    right: 6px;
-    background: none;
-    border: none;
-    font-size: 1rem;
-    color: #888;
-    cursor: pointer;
+  #summaryBox {
+    width: 90%;
+    right: 5%;
+    top: 50px;
+    max-height: 70vh;
+    font-size: 0.9rem;
+    padding: 14px 12px 10px 12px;
   }
+}
 
-  #closeSummary:hover {
-    color: #000;
-  }
-
-  /* モバイル対応 */
-  @media (max-width: 599px) {
-    #summaryBox {
-      width: 90%;
-      right: 5%;
-      top: 50px;
-      max-height: 70vh;
-      font-size: 0.9rem;
-      padding: 14px 12px 10px 12px;
-    }
-  }
   </style>
 </head>
 <body>
