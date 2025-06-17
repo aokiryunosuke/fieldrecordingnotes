@@ -215,6 +215,29 @@ audio {
     padding: 14px 12px 10px 12px;
   }
 }
+    #fullscreenMapButton { /* ★追加 */
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  z-index: 1001;
+  padding: 10px 15px;
+  background-color: #0066cc;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.fullscreen-map { /* ★追加 */
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  height: 100vh !important;
+  width: 100vw !important;
+  z-index: 1000;
+}
+
 
 
   </style>
@@ -473,5 +496,29 @@ document.addEventListener("click", (event) => {
       }
     });
   </script>
+
+  <!-- ★ 地図最大化ボタン -->
+<button id="fullscreenMapButton">🗖 地図を最大化</button>
+
+<script>
+  // ★ 地図拡大切り替えスクリプト
+  const fullscreenBtn = document.getElementById("fullscreenMapButton");
+  let isFullscreen = false;
+
+  fullscreenBtn.addEventListener("click", () => {
+    const mapElement = document.getElementById("map");
+    if (!isFullscreen) {
+      mapElement.classList.add("fullscreen-map");
+      fullscreenBtn.textContent = "🗗 地図を元に戻す";
+      map.invalidateSize();
+    } else {
+      mapElement.classList.remove("fullscreen-map");
+      fullscreenBtn.textContent = "🗖 地図を最大化";
+      map.invalidateSize();
+    }
+    isFullscreen = !isFullscreen;
+  });
+</script>
+
 </body>
 </html>
