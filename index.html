@@ -1,31 +1,28 @@
 <!DOCTYPE html>
+
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Field Recording Notes</title>
-
-  <!-- ファビコン -->
-  <link rel="icon" type="image/png" sizes="16x16" href="/fieldrecordingnotes/サウンドスケープサイコロジー研究室ロゴ縁あり-16.png" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/fieldrecordingnotes/サウンドスケープサイコロジー研究室ロゴ縁あり-32.png" />
-  <link rel="icon" type="image/png" sizes="48x48" href="/fieldrecordingnotes/サウンドスケープサイコロジー研究室ロゴ縁あり-48.png" />
-  <link rel="icon" type="image/png" sizes="192x192" href="/fieldrecordingnotes/サウンドスケープサイコロジー研究室ロゴ縁あり-192.png" />
-  <link rel="apple-touch-icon" href="/fieldrecordingnotes/サウンドスケープサイコロジー研究室ロゴ縁あり-apple.png" />
-
-  <!-- SEO -->
-  <meta name="description" content="フィールドレコーディングのデータ集">
-  <meta name="robots" content="index, follow" />
-  <meta property="og:title" content="Field Recording Notes" />
-  <meta property="og:description" content="フィールドレコーディングのデータ集" />
-  <meta property="og:type" content="website" />
-  <meta property="og:locale" content="ja_JP" />
-
-  <!-- フォントとLeaflet -->
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Field Recording Notes</title>
+<!-- ファビコン -->
+<link href="/fieldrecordingnotes/サウンドスケープサイコロジー研究室ロゴ縁あり-16.png" rel="icon" sizes="16x16" type="image/png"/>
+<link href="/fieldrecordingnotes/サウンドスケープサイコロジー研究室ロゴ縁あり-32.png" rel="icon" sizes="32x32" type="image/png"/>
+<link href="/fieldrecordingnotes/サウンドスケープサイコロジー研究室ロゴ縁あり-48.png" rel="icon" sizes="48x48" type="image/png"/>
+<link href="/fieldrecordingnotes/サウンドスケープサイコロジー研究室ロゴ縁あり-192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="/fieldrecordingnotes/サウンドスケープサイコロジー研究室ロゴ縁あり-apple.png" rel="apple-touch-icon"/>
+<!-- SEO -->
+<meta content="フィールドレコーディングのデータ集" name="description"/>
+<meta content="index, follow" name="robots"/>
+<meta content="Field Recording Notes" property="og:title"/>
+<meta content="フィールドレコーディングのデータ集" property="og:description"/>
+<meta content="website" property="og:type"/>
+<meta content="ja_JP" property="og:locale"/>
+<!-- フォントとLeaflet -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&amp;display=swap" rel="stylesheet"/>
+<link href="https://unpkg.com/leaflet/dist/leaflet.css" rel="stylesheet"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<style>
    
 body {
   font-family: 'Noto Sans JP', sans-serif;
@@ -215,17 +212,17 @@ audio {
     padding: 14px 12px 10px 12px;
   }
 }
-    #fullscreenMapButton { /* ★追加 */
-  position: fixed;
-  bottom: 80px;
-  right: 20px;
+    #fullscreenMapButton {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
   z-index: 1001;
-  padding: 10px 15px;
-  background-color: #0066cc;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  font-size: 0.9rem;
+  padding: 4px 8px;
+  background-color: white;
+  color: black;
+  border: 2px solid #aaa;
+  border-radius: 4px;
+  font-size: 0.75rem;
   cursor: pointer;
 }
 
@@ -240,10 +237,35 @@ audio {
 
 
 
-  </style>
+  
+#map {
+  position: relative;
+}
+#fullscreenMapButton {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  z-index: 1001;
+  padding: 4px 8px;
+  background-color: white;
+  color: black;
+  border: 2px solid #aaa;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+.fullscreen-map {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  height: 100vh !important;
+  width: 100vw !important;
+  z-index: 1000;
+}
+</style>
 </head>
 <body>
-  <script>
+<script>
     document.addEventListener('play', function(e){
       const audios = document.getElementsByTagName('audio');
       for(let i = 0, len = audios.length; i < len; i++){
@@ -254,32 +276,22 @@ audio {
       }
     }, true);
   </script>
-
-  <a id="top"></a>
- <h1>Field Recording Notes</h1>
+<a id="top"></a>
+<h1>Field Recording Notes</h1>
 <button id="summaryButton">概要</button>
-
-
 <!-- 概要ボックス -->
 <div id="summaryBox">
-  <button id="closeSummary" aria-label="閉じる">×</button>
-  
-  <p>YES</p>
+<button aria-label="閉じる" id="closeSummary">×</button>
+<p>YES</p>
 </div>
-
-  <input type="text" id="search" placeholder="検索（例: 250608_0026、三戸浜、鳥）" />
-
-  <div id="map"></div>
-
-  <div id="file-list"></div>
-
-  <button id="topButton" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">↑ トップへ</button>
-
-  <div id="imageModal" class="modal" onclick="closeModal(event)">
-    <img id="modalImage" src="" alt="拡大画像">
-  </div>
-
-  <script>
+<input id="search" placeholder="検索（例: 250608_0026、三戸浜、鳥）" type="text"/>
+<div id="map"><button id="fullscreenMapButton">拡大</button></div>
+<div id="file-list"></div>
+<button id="topButton" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">↑ トップへ</button>
+<div class="modal" id="imageModal" onclick="closeModal(event)">
+<img alt="拡大画像" id="modalImage" src=""/>
+</div>
+<script>
     const files = [
       {
         name: "20250608_1.wav",
@@ -486,6 +498,12 @@ document.addEventListener("click", (event) => {
         button.textContent = "詳細へ移動";
         button.onclick = () => {
           document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+          if (isFullscreen) {
+            document.getElementById('map').classList.remove('fullscreen-map');
+            document.getElementById('fullscreenMapButton').textContent = '拡大';
+            isFullscreen = false;
+            map.invalidateSize();
+          }
         };
         popupContent.appendChild(button);
 
@@ -496,29 +514,66 @@ document.addEventListener("click", (event) => {
       }
     });
   </script>
-
-  <!-- ★ 地図最大化ボタン -->
-<button id="fullscreenMapButton">🗖 地図を最大化</button>
-
+<!-- ★ 地図最大化ボタン -->
 <script>
   // ★ 地図拡大切り替えスクリプト
   const fullscreenBtn = document.getElementById("fullscreenMapButton");
   let isFullscreen = false;
 
-  fullscreenBtn.addEventListener("click", () => {
-    const mapElement = document.getElementById("map");
-    if (!isFullscreen) {
-      mapElement.classList.add("fullscreen-map");
-      fullscreenBtn.textContent = "🗗 地図を元に戻す";
-      map.invalidateSize();
-    } else {
-      mapElement.classList.remove("fullscreen-map");
-      fullscreenBtn.textContent = "🗖 地図を最大化";
-      map.invalidateSize();
+  
+fullscreenBtn.addEventListener("click", () => {
+  const mapElement = document.getElementById("map");
+
+  let openedPopupMarker = null;
+  markers.forEach(marker => {
+    if (marker && marker.getPopup() && marker.getPopup().isOpen()) {
+      openedPopupMarker = marker;
     }
-    isFullscreen = !isFullscreen;
+  });
+
+  if (!isFullscreen) {
+    mapElement.classList.add("fullscreen-map");
+    fullscreenBtn.textContent = "縮小";
+  } else {
+    mapElement.classList.remove("fullscreen-map");
+    fullscreenBtn.textContent = "拡大";
+  }
+
+  isFullscreen = !isFullscreen;
+
+  setTimeout(() => {
+    map.invalidateSize();
+    if (openedPopupMarker) {
+      openedPopupMarker.openPopup();
+    }
+  }, 300);
+});
+document.getElementById("topButton").addEventListener("click", () => {
+    const mapElement = document.getElementById("map");
+    if (isFullscreen) {
+      mapElement.classList.remove("fullscreen-map");
+      fullscreenBtn.textContent = "拡大";
+      map.invalidateSize();
+      isFullscreen = false;
+    }
   });
 </script>
+<script>
+const fullscreenBtn = document.getElementById("fullscreenMapButton");
+let isFullscreen = false;
 
-</body>
+fullscreenBtn.addEventListener("click", () => {
+  const mapElement = document.getElementById("map");
+  if (!isFullscreen) {
+    mapElement.classList.add("fullscreen-map");
+    fullscreenBtn.textContent = "縮小";
+    map.invalidateSize();
+  } else {
+    mapElement.classList.remove("fullscreen-map");
+    fullscreenBtn.textContent = "拡大";
+    map.invalidateSize();
+  }
+  isFullscreen = !isFullscreen;
+});
+</script></body>
 </html>
