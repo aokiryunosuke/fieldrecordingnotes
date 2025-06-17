@@ -213,6 +213,17 @@ audio {
   }
 }
     #fullscreenMapButton {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 1001;
+  padding: 8px 14px;
+  background-color: white;
+  color: black;
+  border: 2px solid #999;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
   position: absolute;
   bottom: 10px;
   left: 10px;
@@ -242,6 +253,17 @@ audio {
   position: relative;
 }
 #fullscreenMapButton {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 1001;
+  padding: 8px 14px;
+  background-color: white;
+  color: black;
+  border: 2px solid #999;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
   position: absolute;
   bottom: 10px;
   left: 10px;
@@ -398,7 +420,36 @@ audio {
           img.alt = file.title;
           img.onclick = () => {
             modalImg.src = imgSrc;
-            modal.classList.add("show");
+            
+    const uiElements = [
+      document.getElementById("summaryButton"),
+      document.getElementById("topButton"),
+      document.getElementById("fullscreenMapButton")
+    ];
+    const closeModalBtn = document.createElement("button");
+    closeModalBtn.id = "modalCloseButton";
+    closeModalBtn.textContent = "✕";
+    closeModalBtn.style.position = "fixed";
+    closeModalBtn.style.top = "20px";
+    closeModalBtn.style.right = "30px";
+    closeModalBtn.style.fontSize = "2rem";
+    closeModalBtn.style.color = "white";
+    closeModalBtn.style.background = "none";
+    closeModalBtn.style.border = "none";
+    closeModalBtn.style.zIndex = 1002;
+    closeModalBtn.style.cursor = "pointer";
+    closeModalBtn.addEventListener("click", () => {
+      modal.classList.remove("show");
+      const closeBtn = document.getElementById('modalCloseButton');
+      if (closeBtn) closeBtn.remove();
+      uiElements.forEach(el => el && (el.style.display = ''));
+      uiElements.forEach(el => el && (el.style.display = ""));
+      closeModalBtn.remove();
+    });
+    modal.classList.add("show");
+    uiElements.forEach(el => el && (el.style.display = "none"));
+    document.body.appendChild(closeModalBtn);
+
           };
           wrapper.appendChild(img);
         });
@@ -421,11 +472,24 @@ audio {
       });
     }
 
-    function closeModal(e) {
-      if (e.target === modal || e.target === modalImg) {
-        modal.classList.remove("show");
-      }
-    }
+function closeModal(e) {
+  if (e.target === modal || e.target === modalImg) {
+    modal.classList.remove("show");
+
+    // ✕ボタン削除
+    const closeBtn = document.getElementById('modalCloseButton');
+    if (closeBtn) closeBtn.remove();
+
+    // UI要素を再表示
+    const uiElements = [
+      document.getElementById("summaryButton"),
+      document.getElementById("topButton"),
+      document.getElementById("fullscreenMapButton")
+    ];
+    uiElements.forEach(el => el && (el.style.display = ''));
+  }
+}
+
 
     searchInput.addEventListener("input", () => {
       renderList(searchInput.value);
@@ -481,7 +545,36 @@ document.addEventListener("click", (event) => {
         img.style.cursor = "pointer";
         img.onclick = () => {
           modalImg.src = img.src;
-          modal.classList.add("show");
+          
+    const uiElements = [
+      document.getElementById("summaryButton"),
+      document.getElementById("topButton"),
+      document.getElementById("fullscreenMapButton")
+    ];
+    const closeModalBtn = document.createElement("button");
+    closeModalBtn.id = "modalCloseButton";
+    closeModalBtn.textContent = "✕";
+    closeModalBtn.style.position = "fixed";
+    closeModalBtn.style.top = "20px";
+    closeModalBtn.style.right = "30px";
+    closeModalBtn.style.fontSize = "2rem";
+    closeModalBtn.style.color = "white";
+    closeModalBtn.style.background = "none";
+    closeModalBtn.style.border = "none";
+    closeModalBtn.style.zIndex = 1002;
+    closeModalBtn.style.cursor = "pointer";
+    closeModalBtn.addEventListener("click", () => {
+      modal.classList.remove("show");
+      const closeBtn = document.getElementById('modalCloseButton');
+      if (closeBtn) closeBtn.remove();
+      uiElements.forEach(el => el && (el.style.display = ''));
+      uiElements.forEach(el => el && (el.style.display = ""));
+      closeModalBtn.remove();
+    });
+    modal.classList.add("show");
+    uiElements.forEach(el => el && (el.style.display = "none"));
+    document.body.appendChild(closeModalBtn);
+
         };
         popupContent.appendChild(img);
         popupContent.appendChild(document.createElement("br"));
@@ -503,6 +596,7 @@ document.addEventListener("click", (event) => {
             document.getElementById('fullscreenMapButton').textContent = '拡大';
             isFullscreen = false;
             map.invalidateSize();
+    if (openedPopup) openedPopup.openPopup();
           }
         };
         popupContent.appendChild(button);
@@ -521,7 +615,12 @@ document.addEventListener("click", (event) => {
   let isFullscreen = false;
 
   
-fullscreenBtn.addEventListener("click", () => {
+
+  let openedPopup = null;
+  fullscreenBtn.addEventListener("click", () => {
+    // 開いているマーカー保持
+    openedPopup = map._popup && map._popup._source;
+
   const mapElement = document.getElementById("map");
 
   let openedPopupMarker = null;
@@ -543,6 +642,7 @@ fullscreenBtn.addEventListener("click", () => {
 
   setTimeout(() => {
     map.invalidateSize();
+    if (openedPopup) openedPopup.openPopup();
     if (openedPopupMarker) {
       openedPopupMarker.openPopup();
     }
@@ -554,6 +654,7 @@ document.getElementById("topButton").addEventListener("click", () => {
       mapElement.classList.remove("fullscreen-map");
       fullscreenBtn.textContent = "拡大";
       map.invalidateSize();
+    if (openedPopup) openedPopup.openPopup();
       isFullscreen = false;
     }
   });
@@ -562,16 +663,23 @@ document.getElementById("topButton").addEventListener("click", () => {
 const fullscreenBtn = document.getElementById("fullscreenMapButton");
 let isFullscreen = false;
 
-fullscreenBtn.addEventListener("click", () => {
+
+  let openedPopup = null;
+  fullscreenBtn.addEventListener("click", () => {
+    // 開いているマーカー保持
+    openedPopup = map._popup && map._popup._source;
+
   const mapElement = document.getElementById("map");
   if (!isFullscreen) {
     mapElement.classList.add("fullscreen-map");
     fullscreenBtn.textContent = "縮小";
     map.invalidateSize();
+    if (openedPopup) openedPopup.openPopup();
   } else {
     mapElement.classList.remove("fullscreen-map");
     fullscreenBtn.textContent = "拡大";
     map.invalidateSize();
+    if (openedPopup) openedPopup.openPopup();
   }
   isFullscreen = !isFullscreen;
 });
