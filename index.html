@@ -286,21 +286,41 @@ audio {
 }
 
 @media (max-width: 599px) {
-  #fullscreenMapButton {
+  /* 地図拡大時のボタン調整 */
+  .fullscreen-map #fullscreenMapButton {
+    position: fixed;
     bottom: 14px !important;
     left: 14px !important;
+    z-index: 1002;
   }
 
-  #topButton {
-    bottom: 60px !important;
+  .fullscreen-map #topButton {
+    position: fixed;
+    bottom: 14px !important;
     right: 14px !important;
+    z-index: 1002;
   }
 
-  #summaryButton {
+  .fullscreen-map #summaryButton {
+    position: fixed;
     top: 14px !important;
     right: 14px !important;
+    z-index: 1002;
+  }
+
+  /* 通常状態のトップボタン調整 */
+  #topButton {
+    bottom: 20px;
+    right: 20px;
+  }
+
+  /* 通常状態の地図ボタン */
+  #fullscreenMapButton {
+    bottom: 20px;
+    left: 20px;
   }
 }
+
 
 </style>
 </head>
