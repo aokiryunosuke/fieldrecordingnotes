@@ -538,6 +538,11 @@ audio {
           const img = document.createElement("img");
           img.src = imgSrc;
           img.alt = file.title;
+
+          // ★追加：モバイル軽量化（デザインは変えない）
+          img.loading = "lazy";
+          img.decoding = "async";
+
           img.onclick = () => {
             modalImg.src = imgSrc;
             
@@ -578,6 +583,9 @@ audio {
         audio.controls = true;
         audio.src = file.name;
 
+        // ★追加：モバイル軽量化（デザインは変えない）
+        audio.preload = "none";
+
         const comment = document.createElement("div");
         comment.className = "comment";
         comment.textContent = file.comment;
@@ -611,8 +619,13 @@ function closeModal(e) {
 }
 
 
+    // ★変更：検索をデバウンス（入力のたびのDOM再生成連発を抑える）
+    let _searchTimer = null;
     searchInput.addEventListener("input", () => {
-      renderList(searchInput.value);
+      if (_searchTimer) clearTimeout(_searchTimer);
+      _searchTimer = setTimeout(() => {
+        renderList(searchInput.value);
+      }, 150);
     });
 
     renderList();
@@ -663,6 +676,11 @@ document.addEventListener("click", (event) => {
         img.style.width = "100px";
         img.style.marginTop = "5px";
         img.style.cursor = "pointer";
+
+        // ★追加：モバイル軽量化（デザインは変えない）
+        img.loading = "lazy";
+        img.decoding = "async";
+
         img.onclick = () => {
           modalImg.src = img.src;
           
@@ -704,6 +722,10 @@ document.addEventListener("click", (event) => {
         audio.src = file.name;
         audio.style.width = "100%";
         audio.style.marginTop = "5px";
+
+        // ★追加：モバイル軽量化（デザインは変えない）
+        audio.preload = "none";
+
         popupContent.appendChild(audio);
         popupContent.appendChild(document.createElement("br"));
 
@@ -716,7 +738,7 @@ document.addEventListener("click", (event) => {
             document.getElementById('fullscreenMapButton').textContent = '拡大';
             isFullscreen = false;
             map.invalidateSize();
-    if (openedPopup) openedPopup.openPopup();
+            if (openedPopup) openedPopup.openPopup();
           }
         };
         popupContent.appendChild(button);
@@ -728,80 +750,56 @@ document.addEventListener("click", (event) => {
       }
     });
   </script>
-<!-- ★ 地図最大化ボタン -->
+
+<!-- ★ 地図最大化ボタン（重複していたスクリプトを1本化） -->
 <script>
-  // ★ 地図拡大切り替えスクリプト
   const fullscreenBtn = document.getElementById("fullscreenMapButton");
   let isFullscreen = false;
-
-  
-
   let openedPopup = null;
+
   fullscreenBtn.addEventListener("click", () => {
-    // 開いているマーカー保持
+    // 開いているポップアップの source を保持
     openedPopup = map._popup && map._popup._source;
 
-  const mapElement = document.getElementById("map");
+    // 開いているマーカー（念のため）も保持
+    let openedPopupMarker = null;
+    markers.forEach(marker => {
+      if (marker && marker.getPopup && marker.getPopup() && marker.getPopup().isOpen()) {
+        openedPopupMarker = marker;
+      }
+    });
 
-  let openedPopupMarker = null;
-  markers.forEach(marker => {
-    if (marker && marker.getPopup() && marker.getPopup().isOpen()) {
-      openedPopupMarker = marker;
+    const mapElement = document.getElementById("map");
+
+    if (!isFullscreen) {
+      mapElement.classList.add("fullscreen-map");
+      fullscreenBtn.textContent = "縮小";
+    } else {
+      mapElement.classList.remove("fullscreen-map");
+      fullscreenBtn.textContent = "拡大";
     }
+
+    isFullscreen = !isFullscreen;
+
+    setTimeout(() => {
+      map.invalidateSize();
+      if (openedPopup) openedPopup.openPopup();
+      if (openedPopupMarker) openedPopupMarker.openPopup();
+    }, 300);
   });
 
-  if (!isFullscreen) {
-    mapElement.classList.add("fullscreen-map");
-    fullscreenBtn.textContent = "縮小";
-  } else {
-    mapElement.classList.remove("fullscreen-map");
-    fullscreenBtn.textContent = "拡大";
-  }
-
-  isFullscreen = !isFullscreen;
-
-  setTimeout(() => {
-    map.invalidateSize();
-    if (openedPopup) openedPopup.openPopup();
-    if (openedPopupMarker) {
-      openedPopupMarker.openPopup();
-    }
-  }, 300);
-});
-document.getElementById("topButton").addEventListener("click", () => {
+  // トップへボタンで縮小（元の挙動維持）
+  document.getElementById("topButton").addEventListener("click", () => {
     const mapElement = document.getElementById("map");
     if (isFullscreen) {
       mapElement.classList.remove("fullscreen-map");
       fullscreenBtn.textContent = "拡大";
       map.invalidateSize();
-    if (openedPopup) openedPopup.openPopup();
+      if (openedPopup) openedPopup.openPopup();
       isFullscreen = false;
     }
   });
 </script>
-<script>
-const fullscreenBtn = document.getElementById("fullscreenMapButton");
-let isFullscreen = false;
 
-
-  let openedPopup = null;
-  fullscreenBtn.addEventListener("click", () => {
-    // 開いているマーカー保持
-    openedPopup = map._popup && map._popup._source;
-
-  const mapElement = document.getElementById("map");
-  if (!isFullscreen) {
-    mapElement.classList.add("fullscreen-map");
-    fullscreenBtn.textContent = "縮小";
-    map.invalidateSize();
-    if (openedPopup) openedPopup.openPopup();
-  } else {
-    mapElement.classList.remove("fullscreen-map");
-    fullscreenBtn.textContent = "拡大";
-    map.invalidateSize();
-    if (openedPopup) openedPopup.openPopup();
-  }
-  isFullscreen = !isFullscreen;
-});
-</script></body>
+</body>
 </html>
