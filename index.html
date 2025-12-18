@@ -246,9 +246,6 @@ audio {
   z-index: 1000;
 }
 
-
-
-  
 #map {
   position: relative;
 }
@@ -320,237 +317,211 @@ audio {
     left: 20px;
   }
 }
-
-
 </style>
 </head>
 <body>
+
 <script>
-    document.addEventListener('play', function(e){
-      const audios = document.getElementsByTagName('audio');
-      for(let i = 0, len = audios.length; i < len; i++){
-        if(audios[i] !== e.target){
-          audios[i].pause();
-          audios[i].currentTime = 0;
-        }
+  document.addEventListener('play', function(e){
+    const audios = document.getElementsByTagName('audio');
+    for(let i = 0, len = audios.length; i < len; i++){
+      if(audios[i] !== e.target){
+        audios[i].pause();
+        audios[i].currentTime = 0;
       }
-    }, true);
-  </script>
+    }
+  }, true);
+</script>
+
 <a id="top"></a>
 <h1>Field Recording Notes</h1>
+
 <button id="summaryButton">概要</button>
 <!-- 概要ボックス -->
 <div id="summaryBox">
-<button aria-label="閉じる" id="closeSummary">×</button>
-<p>YES</p>
+  <button aria-label="閉じる" id="closeSummary">×</button>
+  <p>YES</p>
 </div>
+
 <input id="search" placeholder="検索（例: 250608_0026、三戸浜、鳥）" type="text"/>
+
 <div id="map"><button id="fullscreenMapButton">拡大</button></div>
 <div id="file-list"></div>
+
 <button id="topButton" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">↑ トップへ</button>
+
 <div class="modal" id="imageModal" onclick="closeModal(event)">
-<img alt="拡大画像" id="modalImage" src=""/>
+  <img alt="拡大画像" id="modalImage" src=""/>
 </div>
+
 <script>
-    const files = [
-      {
-        name: "20250608_1.wav",
-        images: ["20250608_1_1.jpg", "20250608_1_2.jpg", "20250608_1_3.jpg"],
-        title: "20250608_1",
-        comment: "東京都目黒区駒場4丁目3-55付近、駒場公園。写真：iPhone15、録音：Zoom H4nPro IL80。15:00、曇り。湿気、気だるい暑さ。複数の鳥の鳴き声が聴こえる。駒場公園、子供が遠くの遊具で遊んでいる、ピクニックをする人々、（人が主体であるような傾向はあるが）、人と自然が共存しているようで、心ごごちの良さがある。場所が広いのがわかる。曇空のようなあわい水色のかかった白のような色がする。静じゃくが常にある。",
-        lat: 35.6615061,
-        lng: 139.6800739
-      },
-      {
-        name: "20250608_2.wav",
-        images: ["20250608_2_1.jpg", "20250608_2_2.jpg", "20250608_2_3.jpg"],
-        title: "20250608_2",
-        comment: "東京都目黒区駒場4丁目3-55付近、駒場公園。田中美羽による、写真：iPhone14、録音：Zoom H4nPro IL80。15:10、雲り。洗練されている　落ち着き　駒場公園の後ろの茂み　背の低い、深い緑の植物が足元に　土が湿っている　陰　湿っていて涼しい　何人かの人がおだやかに話している　木が苔むしている　木の葉のこすれる音がよく聞こえる　少しなつかしい感じ　空気が冷たい、息がしやすい",
-        lat: 35.6614936,
-        lng: 139.6801121
-      },
-      {
-        name: "250608_0014_1.wav",
-        images: ["250608_0014_1.jpg", "250608_0014_2.jpg", "250608_0014_1_3.jpg"],
-        title: "250608_0014_1",
-        comment: "神奈川県川崎市川崎区旭町1丁目付近、多摩川、六郷橋。写真：NikonF SS15、録音：Tascam DR-07X IL80。22:45、曇り。私は多摩川のこの場所のサウンドスケープに前から心をひかれていた。様々な虫たちの声、人々の声、車が走る音、電車が走る音。全ての音が重なって、豊かな倍音を発しているかのように思える。今日は風が強い。ここには独特のここちよい湿気がある。外国人や日本人が歩いたり、釣りをしたりしている。やはり川は広けていて、いろいろな音が広く響いている印象がある。いろいろな音があるが、印象としては静かである。私はこの場所が好きだ。",
-        lat: 35.5359753,
-        lng: 139.7090773
-      },
-       {
-        name: "250608_0014_2.wav",
-        images: ["250608_0014_1.jpg", "250608_0014_2.jpg", "250608_0014_2_3.jpg"],
-        title: "250608_0014_2",
-        comment: "神奈川県川崎市川崎区旭町１丁目付近、多摩川、六郷橋。写真：NikonF SS15、録音：Tascam DR-07X IL80。22:45、曇り。私は多摩川のこの場所のサウンドスケープに前から心をひかれていた。様々な虫たちの声、人々の声、車が走る音、電車が走る音。全ての音が重なって、豊かな倍音を発しているかのように思える。今日は風が強い。ここには独特のここちよい湿気がある。外国人や日本人が歩いたり、釣りをしたりしている。やはり川は広けていて、いろいろな音が広く響いている印象がある。いろいろな音があるが、印象としては静かである。私はこの場所が好きだ。",
-        lat: 35.5359753,
-        lng: 139.7090773
-      },
-      {
-        name: "250609_0015.wav",
-        images: ["250609_0015_1.jpg", "250609_0015_2.jpg", "250609_0015_3.jpg"],
-        title: "250609_0015",
-        comment: "神奈川県三浦市初声町三戸付近、三戸浜。写真：NikonF SS1/250、録音：Tascam DR-07X IL80。12:00、曇り。三浦に来た。たく山のツバメがここに来るまでに低く飛んでいて、湿度が高く、これから雨が降ることがよくわかった。風は、都心の風よりも、きぬのようなやわらかさがあってさっぱりしている。きょうの三戸浜の波は、どこか鋭い多人行儀な音だ。海は広い。遠くから風のような厚い音がきこえてくる（これは飛行機の音かもしれない）。色は白と灰少し青のような、空と海の色を想像する。時間が止まっているような、流れていっているような、自分の場所が不思議な感じである。波の音は大きい。",
-        lat: 35.1742931,
-        lng: 139.6203511
-      },
-      {
-        name: "250609_0018.wav",
-        images: ["250609_0018_1.jpg", "250609_0018_2.jpg", "250609_0018_3.jpg"],
-        title: "250609_0018",
-        comment: "神奈川県三浦市初声町三戸付近、三崎口駅から少しの所。写真：NikonF SS1/125、録音：Tascam DR-07X IL80。13:00、曇り（小雨）。三崎口駅から少し歩くと畑が広がっている。私はその場所が好きだ。普段周りに畑はないが、どこか身近で安心できる感じがある。←ここをかいているときにこ雨が降ってきたのでひなんした。非常に気持ちのいい雨だ。選挙ポスターを見ていたおじさんに話しかけられたが、いい人だ。先程も話しかけられたが、いい人で三浦の人という感じがする。広い所で色いろな鳥や虫が色々な声で鳴いていて、その中に数えられるくらいの人が住んでいる。居ごこちがいい。安らかな気持ち。",
-        lat: 35.1773030,
-        lng: 139.6234702
-      },
-      {
-        name: "250609_0019.wav",
-        images: ["250609_0019_1.jpg", "250609_0019_2.jpg", "250609_0019_3.jpg"],
-        title: "250609_0019",
-        comment: "神奈川県三浦市南下浦町上宮田付近、柿ヶ作第二公園。写真：NikonF SS1/125、録音：Tascam DR-07X IL80。14:30、小雨。三崎口よりも交通量が多くてノイズが多い。しかし、やはり鳥々の声は広くから、クリアに聞こえる。風が少しあり涼しい。友人のマンションのまえである。何も無いという感じがあり心ちよい。全体的に湿っているような印象がある。人々が生活しているのがわかる。私は少し疲れ、若干退くつな気分であるが、新鮮で涼しい風のような進んでいく感じもある。",
-        lat: 35.1835417,
-        lng: 139.6501535
-      },
-      {
-        name: "250609_0026.wav",
-        images: ["250609_0026_1.jpg", "250609_0026_2.jpg", "250609_0026_3.jpg"],
-        title: "250609_0026",
-        comment: "神奈川県三浦市南下浦町菊名付近。写真：iPhone15、録音：Tascam DR-07X IL80。15:50、小雨。小雨がぽつぽつ降っている。三浦海岸から坂をのぼったところにある。上に葉々があり、雨よけになった。葉々が雨によってなっている。三浦海岸で車が走っている音がきこえる。ポツンとどこでもない場所から、広い周りの音を聞いているという印象である。",
-        lat: 35.1781197,
-        lng: 139.6527673
-      },
-      {
-        name: "250617_0032.wav",
-        images: ["250617_0032_1.jpg", "250617_0032_2.jpg", "250617_0032_3.jpg"],
-        title: "250617_0032",
-        comment: "東京都渋谷区渋谷４丁目４付近、青山学院大学。写真：iPhone15、録音：Tascam DR-07X IL80。19:20、曇り。夏の夜である。ありえないほどの湿度で、まるで雨が降っているようだ。非常に高い音が鳴っている。うしろでピアノを弾いている人がいる。まるで夢の中のようだ。私はまろやかで退くつな風を感じながら、夏の夕方を過ごす。",
-        lat: 35.6602980,
-        lng: 139.7111372
-      },
-        {
-        name: "250618_0036.wav",
-        images: ["250618_0036_1.jpg", "250618_0036_2.jpg", "250618_0036_3.jpg"],
-        title: "250618_0036",
-        comment: "東京都港区南青山２丁目３３付近、青山霊園。写真：iPhone15、録音：Tascam DR-07X IL80。11:20、快晴。非常に暑いが嫌な暑さではない。青山霊園はやはり静かな印象を覚える。しかし、今日は少し活発だ。ここらへんの都会では見かけないちょうちょが複数とんでいる。風はおだやかで、時間もゆっくり流れているようだ。",
-        lat: 35.6669325,
-        lng: 139.7220477
-      },
-        {
-        name: "250618_0038.wav",
-        images: ["250618_0038_1.jpg", "250618_0038_2.jpg", "250618_0038_3.jpg"],
-        title: "250618_0038",
-        comment: "東京都港区南青山２丁目３４付近、青山霊園。写真：iPhone15、録音：Tascam DR-07X IL80。11:40、快晴。青山霊園では、自分が思っていたよりもたく山の音が、常に鳴っているようである。それでもってこの静けさと、広さがあるというのは、不思議なようである。遠いところの音がよく聞こえる都会というのは珍しいかもしれない。",
-        lat: 35.6638049,
-        lng: 139.7232534
-      },
-        {
-        name: "250701_0000.wav",
-        images: ["250701_0000_1.jpg", "250701_0000_2.jpg", "250701_0000_3.jpg"],
-        title: "250701_0000",
-        comment: "神奈川県川崎市川崎区大島１丁目４−５サーパス川崎大島付近、家のベランダ。写真：iPhone15、録音：Tascam DR-07X IL80。17:00、曇り。ちょうど17:00の音が鳴っている。こうしてきいてみるといい音である。時報以外でもあらゆる音が鳴っているのがわかる。こんなにも鳥の声がするとは気づかなかった。広い所から音が集まっている印象がある。",
-        lat: 35.5250583,
-        lng: 139.7108432
-      },
-       {
-        name: "250701_0002.wav",
-        images: ["250701_0002_1.jpg", "250701_0002_2.jpg", "250701_0002_3.jpg"],
-        title: "250701_0002",
-        comment: "神奈川県川崎市川崎区大島１丁目４−５サーパス川崎大島付近、家のベランダ。写真：iPhone15、録音：Tascam DR-07X IL80。17:05、曇り。広い所からあらゆる音が聞こえてくる。まるで地面と空のまん中にいるような感覚だ。鳥の声や人々がつくりあげた物々のあまたなる音があらゆるところから聞こえてくる。カラスが多い印象だ。子供の声もする。",
-        lat: 35.5250466,
-        lng: 139.7108056
-      },
-      {
-        name: "250701_0004.wav",
-        images: ["250701_0004_1.jpg", "250701_0004_2.jpg", "250701_0004_3.jpg"],
-        title: "250701_0004",
-        comment: "神奈川県川崎市川崎区大島１丁目４−５サーパス川崎大島付近、家のベッド。写真：iPhone15、録音：Tascam DR-07X IL80。17:00、曇り。私のベッドの上からの録音。窓をあけ、道路に面しているので交通の音がよく入るがここまで多くの音があるとは思っていなかった。また、自転車の音だろうか、非常に高い音も聞こえる。しかしやはり他の場所よりも静かだ。",
-        lat: 35.5251565,
-        lng: 139.7107704
-       },
-       {
-        name: "250705_0005.wav",
-        images: ["250705_0005.jpg", "250705_0005_3.png"],
-        title: "250705_0005",
-        comment: "岩手県中津川下の橋の付け根にて。写真：iPhone 15、録音：Tascam DR-07X IL80。16:10、晴れ。",
-        lat: 39.698466,
-        lng: 141.149190
-       },
-       {
-        name: "250705_0007.wav",
-        images: ["250705_0007.jpg", "250705_0007_3.png"],
-        title: "250705_0007",
-        comment: "岩手県中津川の横道にて。写真：iPhone 15、録音：Tascam DR-07X IL80。18:30、晴れ。",
-        lat: 39.698803,
-        lng: 141.145046
-        },
-       {
-        name: "250706_0016.wav",
-        images: ["250706_0016.jpg", "250706_0016_3.png"],
-        title: "250706_0016",
-        comment: "岩手県焼走り溶岩流。写真：iPhone 15、録音：Tascam DR-07X IL80。11:37、曇り晴れ。",
-        lat: 39.872986,
-        lng: 141.045447
-       },
-       {
-        name: "250706_0017.wav",
-        images: ["250706_0017.jpg", "250706_0017_3.png"],
-        title: "250706_0017",
-        comment: "岩手県八幡平、ART＋HALF STUDIOにて。写真：iPhone 15、録音：Tascam DR-07X IL80。13:00、晴れ。",
-        lat: 39.903542,
-        lng: 140.981594
-      }
-       
-    ];
+  const files = [
+    {
+      name: "20250608_1.wav",
+      images: ["20250608_1_1.jpg", "20250608_1_2.jpg", "20250608_1_3.jpg"],
+      title: "20250608_1",
+      comment: "東京都目黒区駒場4丁目3-55付近、駒場公園。写真：iPhone15、録音：Zoom H4nPro IL80。15:00、曇り。湿気、気だるい暑さ。複数の鳥の鳴き声が聴こえる。駒場公園、子供が遠くの遊具で遊んでいる、ピクニックをする人々、（人が主体であるような傾向はあるが）、人と自然が共存しているようで、心ごごちの良さがある。場所が広いのがわかる。曇空のようなあわい水色のかかった白のような色がする。静じゃくが常にある。",
+      lat: 35.6615061,
+      lng: 139.6800739
+    },
+    {
+      name: "20250608_2.wav",
+      images: ["20250608_2_1.jpg", "20250608_2_2.jpg", "20250608_2_3.jpg"],
+      title: "20250608_2",
+      comment: "東京都目黒区駒場4丁目3-55付近、駒場公園。田中美羽による、写真：iPhone14、録音：Zoom H4nPro IL80。15:10、雲り。洗練されている　落ち着き　駒場公園の後ろの茂み　背の低い、深い緑の植物が足元に　土が湿っている　陰　湿っていて涼しい　何人かの人がおだやかに話している　木が苔むしている　木の葉のこすれる音がよく聞こえる　少しなつかしい感じ　空気が冷たい、息がしやすい",
+      lat: 35.6614936,
+      lng: 139.6801121
+    },
+    {
+      name: "250608_0014_1.wav",
+      images: ["250608_0014_1.jpg", "250608_0014_2.jpg", "250608_0014_1_3.jpg"],
+      title: "250608_0014_1",
+      comment: "神奈川県川崎市川崎区旭町1丁目付近、多摩川、六郷橋。写真：NikonF SS15、録音：Tascam DR-07X IL80。22:45、曇り。私は多摩川のこの場所のサウンドスケープに前から心をひかれていた。様々な虫たちの声、人々の声、車が走る音、電車が走る音。全ての音が重なって、豊かな倍音を発しているかのように思える。今日は風が強い。ここには独特のここちよい湿気がある。外国人や日本人が歩いたり、釣りをしたりしている。やはり川は広けていて、いろいろな音が広く響いている印象がある。いろいろな音があるが、印象としては静かである。私はこの場所が好きだ。",
+      lat: 35.5359753,
+      lng: 139.7090773
+    },
+    {
+      name: "250608_0014_2.wav",
+      images: ["250608_0014_1.jpg", "250608_0014_2.jpg", "250608_0014_2_3.jpg"],
+      title: "250608_0014_2",
+      comment: "神奈川県川崎市川崎区旭町１丁目付近、多摩川、六郷橋。写真：NikonF SS15、録音：Tascam DR-07X IL80。22:45、曇り。私は多摩川のこの場所のサウンドスケープに前から心をひかれていた。様々な虫たちの声、人々の声、車が走る音、電車が走る音。全ての音が重なって、豊かな倍音を発しているかのように思える。今日は風が強い。ここには独特のここちよい湿気がある。外国人や日本人が歩いたり、釣りをしたりしている。やはり川は広けていて、いろいろな音が広く響いている印象がある。いろいろな音があるが、印象としては静かである。私はこの場所が好きだ。",
+      lat: 35.5359753,
+      lng: 139.7090773
+    },
+    {
+      name: "250609_0015.wav",
+      images: ["250609_0015_1.jpg", "250609_0015_2.jpg", "250609_0015_3.jpg"],
+      title: "250609_0015",
+      comment: "神奈川県三浦市初声町三戸付近、三戸浜。写真：NikonF SS1/250、録音：Tascam DR-07X IL80。12:00、曇り。三浦に来た。たく山のツバメがここに来るまでに低く飛んでいて、湿度が高く、これから雨が降ることがよくわかった。風は、都心の風よりも、きぬのようなやわらかさがあってさっぱりしている。きょうの三戸浜の波は、どこか鋭い多人行儀な音だ。海は広い。遠くから風のような厚い音がきこえてくる（これは飛行機の音かもしれない）。色は白と灰少し青のような、空と海の色を想像する。時間が止まっているような、流れていっているような、自分の場所が不思議な感じである。波の音は大きい。",
+      lat: 35.1742931,
+      lng: 139.6203511
+    },
+    {
+      name: "250609_0018.wav",
+      images: ["250609_0018_1.jpg", "250609_0018_2.jpg", "250609_0018_3.jpg"],
+      title: "250609_0018",
+      comment: "神奈川県三浦市初声町三戸付近、三崎口駅から少しの所。写真：NikonF SS1/125、録音：Tascam DR-07X IL80。13:00、曇り（小雨）。三崎口駅から少し歩くと畑が広がっている。私はその場所が好きだ。普段周りに畑はないが、どこか身近で安心できる感じがある。←ここをかいているときにこ雨が降ってきたのでひなんした。非常に気持ちのいい雨だ。選挙ポスターを見ていたおじさんに話しかけられたが、いい人だ。先程も話しかけられたが、いい人で三浦の人という感じがする。広い所で色いろな鳥や虫が色々な声で鳴いていて、その中に数えられるくらいの人が住んでいる。居ごこちがいい。安らかな気持ち。",
+      lat: 35.1773030,
+      lng: 139.6234702
+    },
+    {
+      name: "250609_0019.wav",
+      images: ["250609_0019_1.jpg", "250609_0019_2.jpg", "250609_0019_3.jpg"],
+      title: "250609_0019",
+      comment: "神奈川県三浦市南下浦町上宮田付近、柿ヶ作第二公園。写真：NikonF SS1/125、録音：Tascam DR-07X IL80。14:30、小雨。三崎口よりも交通量が多くてノイズが多い。しかし、やはり鳥々の声は広くから、クリアに聞こえる。風が少しあり涼しい。友人のマンションのまえである。何も無いという感じがあり心ちよい。全体的に湿っているような印象がある。人々が生活しているのがわかる。私は少し疲れ、若干退くつな気分であるが、新鮮で涼しい風のような進んでいく感じもある。",
+      lat: 35.1835417,
+      lng: 139.6501535
+    },
+    {
+      name: "250609_0026.wav",
+      images: ["250609_0026_1.jpg", "250609_0026_2.jpg", "250609_0026_3.jpg"],
+      title: "250609_0026",
+      comment: "神奈川県三浦市南下浦町菊名付近。写真：iPhone15、録音：Tascam DR-07X IL80。15:50、小雨。小雨がぽつぽつ降っている。三浦海岸から坂をのぼったところにある。上に葉々があり、雨よけになった。葉々が雨によってなっている。三浦海岸で車が走っている音がきこえる。ポツンとどこでもない場所から、広い周りの音を聞いているという印象である。",
+      lat: 35.1781197,
+      lng: 139.6527673
+    },
+    {
+      name: "250617_0032.wav",
+      images: ["250617_0032_1.jpg", "250617_0032_2.jpg", "250617_0032_3.jpg"],
+      title: "250617_0032",
+      comment: "東京都渋谷区渋谷４丁目４付近、青山学院大学。写真：iPhone15、録音：Tascam DR-07X IL80。19:20、曇り。夏の夜である。ありえないほどの湿度で、まるで雨が降っているようだ。非常に高い音が鳴っている。うしろでピアノを弾いている人がいる。まるで夢の中のようだ。私はまろやかで退くつな風を感じながら、夏の夕方を過ごす。",
+      lat: 35.6602980,
+      lng: 139.7111372
+    },
+    {
+      name: "250618_0036.wav",
+      images: ["250618_0036_1.jpg", "250618_0036_2.jpg", "250618_0036_3.jpg"],
+      title: "250618_0036",
+      comment: "東京都港区南青山２丁目３３付近、青山霊園。写真：iPhone15、録音：Tascam DR-07X IL80。11:20、快晴。非常に暑いが嫌な暑さではない。青山霊園はやはり静かな印象を覚える。しかし、今日は少し活発だ。ここらへんの都会では見かけないちょうちょが複数とんでいる。風はおだやかで、時間もゆっくり流れているようだ。",
+      lat: 35.6669325,
+      lng: 139.7220477
+    },
+    {
+      name: "250618_0038.wav",
+      images: ["250618_0038_1.jpg", "250618_0038_2.jpg", "250618_0038_3.jpg"],
+      title: "250618_0038",
+      comment: "東京都港区南青山２丁目３４付近、青山霊園。写真：iPhone15、録音：Tascam DR-07X IL80。11:40、快晴。青山霊園では、自分が思っていたよりもたく山の音が、常に鳴っているようである。それでもってこの静けさと、広さがあるというのは、不思議なようである。遠いところの音がよく聞こえる都会というのは珍しいかもしれない。",
+      lat: 35.6638049,
+      lng: 139.7232534
+    },
+    {
+      name: "250701_0000.wav",
+      images: ["250701_0000_1.jpg", "250701_0000_2.jpg", "250701_0000_3.jpg"],
+      title: "250701_0000",
+      comment: "神奈川県川崎市川崎区大島１丁目４−５サーパス川崎大島付近、家のベランダ。写真：iPhone15、録音：Tascam DR-07X IL80。17:00、曇り。ちょうど17:00の音が鳴っている。こうしてきいてみるといい音である。時報以外でもあらゆる音が鳴っているのがわかる。こんなにも鳥の声がするとは気づかなかった。広い所から音が集まっている印象がある。",
+      lat: 35.5250583,
+      lng: 139.7108432
+    },
+    {
+      name: "250701_0002.wav",
+      images: ["250701_0002_1.jpg", "250701_0002_2.jpg", "250701_0002_3.jpg"],
+      title: "250701_0002",
+      comment: "神奈川県川崎市川崎区大島１丁目４−５サーパス川崎大島付近、家のベランダ。写真：iPhone15、録音：Tascam DR-07X IL80。17:05、曇り。広い所からあらゆる音が聞こえてくる。まるで地面と空のまん中にいるような感覚だ。鳥の声や人々がつくりあげた物々のあまたなる音があらゆるところから聞こえてくる。カラスが多い印象だ。子供の声もする。",
+      lat: 35.5250466,
+      lng: 139.7108056
+    },
+    {
+      name: "250701_0004.wav",
+      images: ["250701_0004_1.jpg", "250701_0004_2.jpg", "250701_0004_3.jpg"],
+      title: "250701_0004",
+      comment: "神奈川県川崎市川崎区大島１丁目４−５サーパス川崎大島付近、家のベッド。写真：iPhone15、録音：Tascam DR-07X IL80。17:00、曇り。私のベッドの上からの録音。窓をあけ、道路に面しているので交通の音がよく入るがここまで多くの音があるとは思っていなかった。また、自転車の音だろうか、非常に高い音も聞こえる。しかしやはり他の場所よりも静かだ。",
+      lat: 35.5251565,
+      lng: 139.7107704
+    },
+    {
+      name: "250705_0005.wav",
+      images: ["250705_0005.jpg", "250705_0005_3.png"],
+      title: "250705_0005",
+      comment: "岩手県中津川下の橋の付け根にて。写真：iPhone 15、録音：Tascam DR-07X IL80。16:10、晴れ。",
+      lat: 39.698466,
+      lng: 141.149190
+    },
+    {
+      name: "250705_0007.wav",
+      images: ["250705_0007.jpg", "250705_0007_3.png"],
+      title: "250705_0007",
+      comment: "岩手県中津川の横道にて。写真：iPhone 15、録音：Tascam DR-07X IL80。18:30、晴れ。",
+      lat: 39.698803,
+      lng: 141.145046
+    },
+    {
+      name: "250706_0016.wav",
+      images: ["250706_0016.jpg", "250706_0016_3.png"],
+      title: "250706_0016",
+      comment: "岩手県焼走り溶岩流。写真：iPhone 15、録音：Tascam DR-07X IL80。11:37、曇り晴れ。",
+      lat: 39.872986,
+      lng: 141.045447
+    },
+    {
+      name: "250706_0017.wav",
+      images: ["250706_0017.jpg", "250706_0017_3.png"],
+      title: "250706_0017",
+      comment: "岩手県八幡平、ART＋HALF STUDIOにて。写真：iPhone 15、録音：Tascam DR-07X IL80。13:00、晴れ。",
+      lat: 39.903542,
+      lng: 140.981594
+    }
+  ];
 
+  const fileList = document.getElementById("file-list");
+  const searchInput = document.getElementById("search");
+  const modal = document.getElementById("imageModal");
+  const modalImg = document.getElementById("modalImage");
 
-    const fileList = document.getElementById("file-list");
-    const searchInput = document.getElementById("search");
-    const modal = document.getElementById("imageModal");
-    const modalImg = document.getElementById("modalImage");
+  const markers = [];
 
-    const markers = [];
+  // ★追加：検索で作り直さない（表示/非表示のみ）
+  const renderedItems = []; // { el, searchText }
 
-    function renderList(filter = "") {
-      fileList.innerHTML = "";
+  // モーダルの共通UI制御（そのまま）
+  function showModalWithImage(imgSrc) {
+    modalImg.src = imgSrc;
 
-      files.forEach((file, index) => {
-        const match = (file.title + file.comment).toLowerCase().includes(filter.toLowerCase());
-        if (!match) return;
-
-        const id = `item-${index}`;
-
-        const item = document.createElement("div");
-        item.className = "file-item";
-        item.id = id;
-
-        const content = document.createElement("div");
-
-        const titleEl = document.createElement("div");
-        titleEl.className = "title";
-        titleEl.textContent = file.title;
-        titleEl.onclick = () => {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-          map.setView([file.lat, file.lng], 10);
-          markers[index].openPopup();
-        };
-
-        const wrapper = document.createElement("div");
-        wrapper.className = "image-wrapper";
-        file.images.forEach(imgSrc => {
-          const img = document.createElement("img");
-          img.src = imgSrc;
-          img.alt = file.title;
-
-          // ★追加：モバイル軽量化（デザインは変えない）
-          img.loading = "lazy";
-          img.decoding = "async";
-
-          img.onclick = () => {
-            modalImg.src = imgSrc;
-            
     const uiElements = [
       document.getElementById("summaryButton"),
       document.getElementById("topButton"),
       document.getElementById("fullscreenMapButton")
     ];
+
     const closeModalBtn = document.createElement("button");
     closeModalBtn.id = "modalCloseButton";
     closeModalBtn.textContent = "✕";
@@ -571,197 +542,218 @@ audio {
       uiElements.forEach(el => el && (el.style.display = ""));
       closeModalBtn.remove();
     });
+
     modal.classList.add("show");
     uiElements.forEach(el => el && (el.style.display = "none"));
     document.body.appendChild(closeModalBtn);
-
-          };
-          wrapper.appendChild(img);
-        });
-
-        const audio = document.createElement("audio");
-        audio.controls = true;
-        audio.src = file.name;
-
-        // ★追加：モバイル軽量化（デザインは変えない）
-        audio.preload = "none";
-
-        const comment = document.createElement("div");
-        comment.className = "comment";
-        comment.textContent = file.comment;
-
-        content.appendChild(titleEl);
-        content.appendChild(wrapper);
-        content.appendChild(audio);
-        content.appendChild(comment);
-
-        item.appendChild(content);
-        fileList.appendChild(item);
-      });
-    }
-
-function closeModal(e) {
-  if (e.target === modal || e.target === modalImg) {
-    modal.classList.remove("show");
-
-    // ✕ボタン削除
-    const closeBtn = document.getElementById('modalCloseButton');
-    if (closeBtn) closeBtn.remove();
-
-    // UI要素を再表示
-    const uiElements = [
-      document.getElementById("summaryButton"),
-      document.getElementById("topButton"),
-      document.getElementById("fullscreenMapButton")
-    ];
-    uiElements.forEach(el => el && (el.style.display = ''));
   }
-}
 
-
-    // ★変更：検索をデバウンス（入力のたびのDOM再生成連発を抑える）
-    let _searchTimer = null;
-    searchInput.addEventListener("input", () => {
-      if (_searchTimer) clearTimeout(_searchTimer);
-      _searchTimer = setTimeout(() => {
-        renderList(searchInput.value);
-      }, 150);
-    });
-
-    renderList();
-
-    // === 概要表示の要素取得 ===
-const summaryBtn = document.getElementById("summaryButton");
-const summaryBox = document.getElementById("summaryBox");
-const closeSummary = document.getElementById("closeSummary");
-
-// === ボタンで開閉 ===
-function toggleSummary() {
-  const isVisible = summaryBox.style.display === "block";
-  summaryBox.style.display = isVisible ? "none" : "block";
-}
-summaryBtn.addEventListener("click", toggleSummary);
-
-// === ×ボタンで閉じる ===
-closeSummary.addEventListener("click", () => {
-  summaryBox.style.display = "none";
-});
-
-// === ボックス外をクリックしたら閉じる ===
-document.addEventListener("click", (event) => {
-  const isInside = summaryBox.contains(event.target) || summaryBtn.contains(event.target);
-  if (!isInside) {
-    summaryBox.style.display = "none";
-  }
-});
-
-
-    const map = L.map('map').setView([36.2, 138.2], 6);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+  function buildListOnce() {
+    fileList.innerHTML = "";
+    renderedItems.length = 0;
 
     files.forEach((file, index) => {
-      if (file.lat && file.lng) {
-        const id = `item-${index}`;
-        const marker = L.marker([file.lat, file.lng]).addTo(map);
-        const popupContent = document.createElement("div");
-        const title = document.createElement("strong");
-        title.textContent = file.title;
-        popupContent.appendChild(title);
-        popupContent.appendChild(document.createElement("br"));
+      const id = `item-${index}`;
 
+      const item = document.createElement("div");
+      item.className = "file-item";
+      item.id = id;
+
+      const content = document.createElement("div");
+
+      const titleEl = document.createElement("div");
+      titleEl.className = "title";
+      titleEl.textContent = file.title;
+      titleEl.onclick = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        map.setView([file.lat, file.lng], 10);
+        if (markers[index]) markers[index].openPopup();
+      };
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "image-wrapper";
+
+      file.images.forEach(imgSrc => {
         const img = document.createElement("img");
-        img.src = file.images[0];
-        img.style.width = "100px";
-        img.style.marginTop = "5px";
-        img.style.cursor = "pointer";
+        img.src = imgSrc;
+        img.alt = file.title;
 
-        // ★追加：モバイル軽量化（デザインは変えない）
+        // ★軽量化：遅延読み込み（見た目は変えない）
         img.loading = "lazy";
         img.decoding = "async";
 
-        img.onclick = () => {
-          modalImg.src = img.src;
-          
-    const uiElements = [
-      document.getElementById("summaryButton"),
-      document.getElementById("topButton"),
-      document.getElementById("fullscreenMapButton")
-    ];
-    const closeModalBtn = document.createElement("button");
-    closeModalBtn.id = "modalCloseButton";
-    closeModalBtn.textContent = "✕";
-    closeModalBtn.style.position = "fixed";
-    closeModalBtn.style.top = "20px";
-    closeModalBtn.style.right = "30px";
-    closeModalBtn.style.fontSize = "2rem";
-    closeModalBtn.style.color = "white";
-    closeModalBtn.style.background = "none";
-    closeModalBtn.style.border = "none";
-    closeModalBtn.style.zIndex = 1002;
-    closeModalBtn.style.cursor = "pointer";
-    closeModalBtn.addEventListener("click", () => {
+        img.onclick = () => showModalWithImage(imgSrc);
+        wrapper.appendChild(img);
+      });
+
+      const audio = document.createElement("audio");
+      audio.controls = true;
+      audio.src = file.name;
+
+      // ★軽量化：初期ロード抑制（見た目は変えない）
+      audio.preload = "none";
+
+      const comment = document.createElement("div");
+      comment.className = "comment";
+      comment.textContent = file.comment;
+
+      content.appendChild(titleEl);
+      content.appendChild(wrapper);
+      content.appendChild(audio);
+      content.appendChild(comment);
+
+      item.appendChild(content);
+      fileList.appendChild(item);
+
+      renderedItems.push({
+        el: item,
+        searchText: (file.title + " " + file.comment).toLowerCase()
+      });
+    });
+  }
+
+  function filterList(filter = "") {
+    const q = filter.toLowerCase().trim();
+    renderedItems.forEach(({ el, searchText }) => {
+      const match = (q === "") || searchText.includes(q);
+      el.style.display = match ? "" : "none";
+    });
+  }
+
+  function closeModal(e) {
+    if (e.target === modal || e.target === modalImg) {
       modal.classList.remove("show");
+
+      // ✕ボタン削除
       const closeBtn = document.getElementById('modalCloseButton');
       if (closeBtn) closeBtn.remove();
+
+      // UI要素を再表示
+      const uiElements = [
+        document.getElementById("summaryButton"),
+        document.getElementById("topButton"),
+        document.getElementById("fullscreenMapButton")
+      ];
       uiElements.forEach(el => el && (el.style.display = ''));
-      uiElements.forEach(el => el && (el.style.display = ""));
-      closeModalBtn.remove();
-    });
-    modal.classList.add("show");
-    uiElements.forEach(el => el && (el.style.display = "none"));
-    document.body.appendChild(closeModalBtn);
+    }
+  }
+  window.closeModal = closeModal;
 
-        };
-        popupContent.appendChild(img);
-        popupContent.appendChild(document.createElement("br"));
+  // === 概要表示の要素取得 ===
+  const summaryBtn = document.getElementById("summaryButton");
+  const summaryBox = document.getElementById("summaryBox");
+  const closeSummary = document.getElementById("closeSummary");
 
-        const audio = document.createElement("audio");
-        audio.controls = true;
-        audio.src = file.name;
-        audio.style.width = "100%";
-        audio.style.marginTop = "5px";
+  // === ボタンで開閉 ===
+  function toggleSummary() {
+    const isVisible = summaryBox.style.display === "block";
+    summaryBox.style.display = isVisible ? "none" : "block";
+  }
+  summaryBtn.addEventListener("click", toggleSummary);
 
-        // ★追加：モバイル軽量化（デザインは変えない）
-        audio.preload = "none";
+  // === ×ボタンで閉じる ===
+  closeSummary.addEventListener("click", () => {
+    summaryBox.style.display = "none";
+  });
 
-        popupContent.appendChild(audio);
-        popupContent.appendChild(document.createElement("br"));
+  // === ボックス外をクリックしたら閉じる ===
+  document.addEventListener("click", (event) => {
+    const isInside = summaryBox.contains(event.target) || summaryBtn.contains(event.target);
+    if (!isInside) {
+      summaryBox.style.display = "none";
+    }
+  });
 
-        const button = document.createElement("button");
-        button.textContent = "詳細へ移動";
-        button.onclick = () => {
-          document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
-          if (isFullscreen) {
-            document.getElementById('map').classList.remove('fullscreen-map');
-            document.getElementById('fullscreenMapButton').textContent = '拡大';
-            isFullscreen = false;
-            map.invalidateSize();
-            if (openedPopup) openedPopup.openPopup();
-          }
-        };
-        popupContent.appendChild(button);
+  // === Map ===
+  const map = L.map('map').setView([36.2, 138.2], 6);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
 
-        marker.bindPopup(popupContent);
-        markers.push(marker);
-      } else {
-        markers.push(null);
-      }
-    });
-  </script>
+  files.forEach((file, index) => {
+    if (file.lat && file.lng) {
+      const id = `item-${index}`;
+      const marker = L.marker([file.lat, file.lng]).addTo(map);
 
-<!-- ★ 地図最大化ボタン（重複していたスクリプトを1本化） -->
+      const popupContent = document.createElement("div");
+      const title = document.createElement("strong");
+      title.textContent = file.title;
+      popupContent.appendChild(title);
+      popupContent.appendChild(document.createElement("br"));
+
+      const img = document.createElement("img");
+      img.src = file.images[0];
+      img.style.width = "100px";
+      img.style.marginTop = "5px";
+      img.style.cursor = "pointer";
+
+      // ★軽量化：遅延読み込み
+      img.loading = "lazy";
+      img.decoding = "async";
+
+      img.onclick = () => showModalWithImage(img.src);
+
+      popupContent.appendChild(img);
+      popupContent.appendChild(document.createElement("br"));
+
+      const audio = document.createElement("audio");
+      audio.controls = true;
+      audio.src = file.name;
+      audio.style.width = "100%";
+      audio.style.marginTop = "5px";
+
+      // ★軽量化：初期ロード抑制
+      audio.preload = "none";
+
+      popupContent.appendChild(audio);
+      popupContent.appendChild(document.createElement("br"));
+
+      const button = document.createElement("button");
+      button.textContent = "詳細へ移動";
+      button.onclick = () => {
+        const target = document.getElementById(id);
+        if (target) target.scrollIntoView({ behavior: 'smooth' });
+
+        if (isFullscreen) {
+          document.getElementById('map').classList.remove('fullscreen-map');
+          document.getElementById('fullscreenMapButton').textContent = '拡大';
+          isFullscreen = false;
+          map.invalidateSize();
+          if (openedPopup) openedPopup.openPopup();
+        }
+      };
+      popupContent.appendChild(button);
+
+      marker.bindPopup(popupContent);
+      markers.push(marker);
+    } else {
+      markers.push(null);
+    }
+  });
+
+  // ★重要：リストは1回だけ作って、検索は表示切替のみ
+  buildListOnce();
+  filterList("");
+
+  // ★検索：デバウンス + フィルタだけ
+  let _searchTimer = null;
+  searchInput.addEventListener("input", () => {
+    if (_searchTimer) clearTimeout(_searchTimer);
+    _searchTimer = setTimeout(() => {
+      filterList(searchInput.value);
+    }, 150);
+  });
+</script>
+
+<!-- ★ 地図最大化ボタン（重複していたスクリプトは1本化） -->
 <script>
   const fullscreenBtn = document.getElementById("fullscreenMapButton");
   let isFullscreen = false;
   let openedPopup = null;
 
   fullscreenBtn.addEventListener("click", () => {
-    // 開いているポップアップの source を保持
     openedPopup = map._popup && map._popup._source;
 
-    // 開いているマーカー（念のため）も保持
     let openedPopupMarker = null;
     markers.forEach(marker => {
       if (marker && marker.getPopup && marker.getPopup() && marker.getPopup().isOpen()) {
@@ -788,7 +780,6 @@ document.addEventListener("click", (event) => {
     }, 300);
   });
 
-  // トップへボタンで縮小（元の挙動維持）
   document.getElementById("topButton").addEventListener("click", () => {
     const mapElement = document.getElementById("map");
     if (isFullscreen) {
