@@ -187,6 +187,7 @@ audio {
   color: #000;
 }
 
+
 /* ★追加：地図ポップアップの幅を広くする */
 .leaflet-popup-content {
   min-width: 240px;
@@ -197,6 +198,16 @@ audio {
   width: 240px;
   max-width: 100%;
   display: block;
+}
+
+@media (max-width: 599px) {
+  .leaflet-popup-content {
+    min-width: 220px;
+  }
+
+  .leaflet-popup-content audio {
+    width: 220px;
+  }
 }
 
 /* モバイル対応 */
@@ -222,15 +233,6 @@ audio {
     max-height: 70vh;
     font-size: 0.9rem;
     padding: 14px 12px 10px 12px;
-  }
-
-  /* ★追加：スマホでは少しだけ小さくする */
-  .leaflet-popup-content {
-    min-width: 220px;
-  }
-
-  .leaflet-popup-content audio {
-    width: 220px;
   }
 }
     #fullscreenMapButton {
@@ -348,7 +350,6 @@ audio {
     for(let i = 0, len = audios.length; i < len; i++){
       if(audios[i] !== e.target){
         audios[i].pause();
-        audios[i].currentTime = 0;
       }
     }
   }, true);
