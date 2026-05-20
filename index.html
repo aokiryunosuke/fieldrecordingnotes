@@ -68,22 +68,6 @@ h1 {
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-.image-wrapper {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
-}
-
-.image-wrapper img {
-  width: 100px;
-  height: auto;               /* ← 追加：比率を保つ */
-  object-fit: contain;        /* ← 追加：切り取り防止 */
-  cursor: pointer;
-  position: relative;
-  border-radius: 0;
-}
-
 audio {
   width: 100%;
   margin-top: 10px;
@@ -101,27 +85,6 @@ audio {
 .comment {
   margin-top: 8px;
   color: #555;
-}
-
-.modal {
-  display: none;
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background: rgba(0, 0, 0, 0.9);
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal.show {
-  display: flex;
-}
-
-.modal img {
-  max-width: 90%;
-  max-height: 80vh;
-  border-radius: 0;
 }
 
 #topButton {
@@ -213,13 +176,7 @@ audio {
 
 /* モバイル対応 */
 @media (max-width: 599px) {
-  .image-wrapper img {
-    width: 60px;
-    height: auto;
-    object-fit: contain;
-  }
-
-  #summaryButton {
+#summaryButton {
     position: absolute;
     top: 33px;       /* 検索欄の上に合わせる（適宜微調整） */
     right: 30px;
@@ -373,10 +330,6 @@ audio {
 <div id="file-list"></div>
 
 <button id="topButton" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">↑ トップへ</button>
-
-<div class="modal" id="imageModal" onclick="closeModal(event)">
-  <img alt="拡大画像" id="modalImage" src=""/>
-</div>
 
 <script>
   const files = [
@@ -584,50 +537,11 @@ audio {
 
   const fileList = document.getElementById("file-list");
   const searchInput = document.getElementById("search");
-  const modal = document.getElementById("imageModal");
-  const modalImg = document.getElementById("modalImage");
 
   const markers = [];
 
   // ★追加：検索で作り直さない（表示/非表示のみ）
   const renderedItems = []; // { el, searchText }
-
-  // モーダルの共通UI制御（そのまま）
-  function showModalWithImage(imgSrc) {
-    modalImg.src = imgSrc;
-
-    const uiElements = [
-      document.getElementById("summaryButton"),
-      document.getElementById("topButton"),
-      document.getElementById("fullscreenMapButton")
-    ];
-
-    const closeModalBtn = document.createElement("button");
-    closeModalBtn.id = "modalCloseButton";
-    closeModalBtn.textContent = "✕";
-    closeModalBtn.style.position = "fixed";
-    closeModalBtn.style.top = "20px";
-    closeModalBtn.style.right = "30px";
-    closeModalBtn.style.fontSize = "2rem";
-    closeModalBtn.style.color = "white";
-    closeModalBtn.style.background = "none";
-    closeModalBtn.style.border = "none";
-    closeModalBtn.style.zIndex = 1002;
-    closeModalBtn.style.cursor = "pointer";
-    closeModalBtn.addEventListener("click", () => {
-      modal.classList.remove("show");
-      const closeBtn = document.getElementById('modalCloseButton');
-      if (closeBtn) closeBtn.remove();
-      uiElements.forEach(el => el && (el.style.display = ''));
-      uiElements.forEach(el => el && (el.style.display = ""));
-      closeModalBtn.remove();
-    });
-
-    modal.classList.add("show");
-    uiElements.forEach(el => el && (el.style.display = "none"));
-    document.body.appendChild(closeModalBtn);
-  }
-
   function buildListOnce() {
     fileList.innerHTML = "";
     renderedItems.length = 0;
@@ -649,24 +563,7 @@ audio {
         map.setView([file.lat, file.lng], 10);
         if (markers[index]) markers[index].openPopup();
       };
-
-      const wrapper = document.createElement("div");
-      wrapper.className = "image-wrapper";
-
-      file.images.forEach(imgSrc => {
-        const img = document.createElement("img");
-        img.src = imgSrc;
-        img.alt = file.title;
-
-        // ★軽量化：遅延読み込み（見た目は変えない）
-        img.loading = "lazy";
-        img.decoding = "async";
-
-        img.onclick = () => showModalWithImage(imgSrc);
-        wrapper.appendChild(img);
-      });
-
-      const audio = document.createElement("audio");
+const audio = document.createElement("audio");
       audio.controls = true;
       audio.src = file.name;
 
@@ -678,7 +575,6 @@ audio {
       comment.textContent = file.comment;
 
       content.appendChild(titleEl);
-      content.appendChild(wrapper);
       content.appendChild(audio);
       content.appendChild(comment);
 
@@ -699,27 +595,7 @@ audio {
       el.style.display = match ? "" : "none";
     });
   }
-
-  function closeModal(e) {
-    if (e.target === modal || e.target === modalImg) {
-      modal.classList.remove("show");
-
-      // ✕ボタン削除
-      const closeBtn = document.getElementById('modalCloseButton');
-      if (closeBtn) closeBtn.remove();
-
-      // UI要素を再表示
-      const uiElements = [
-        document.getElementById("summaryButton"),
-        document.getElementById("topButton"),
-        document.getElementById("fullscreenMapButton")
-      ];
-      uiElements.forEach(el => el && (el.style.display = ''));
-    }
-  }
-  window.closeModal = closeModal;
-
-  // === 概要表示の要素取得 ===
+// === 概要表示の要素取得 ===
   const summaryBtn = document.getElementById("summaryButton");
   const summaryBox = document.getElementById("summaryBox");
   const closeSummary = document.getElementById("closeSummary");
@@ -760,23 +636,7 @@ audio {
       title.textContent = file.title;
       popupContent.appendChild(title);
       popupContent.appendChild(document.createElement("br"));
-
-      const img = document.createElement("img");
-      img.src = file.images[0];
-      img.style.width = "100px";
-      img.style.marginTop = "5px";
-      img.style.cursor = "pointer";
-
-      // ★軽量化：遅延読み込み
-      img.loading = "lazy";
-      img.decoding = "async";
-
-      img.onclick = () => showModalWithImage(img.src);
-
-      popupContent.appendChild(img);
-      popupContent.appendChild(document.createElement("br"));
-
-      const audio = document.createElement("audio");
+const audio = document.createElement("audio");
       audio.controls = true;
       audio.src = file.name;
       audio.style.width = "100%";
