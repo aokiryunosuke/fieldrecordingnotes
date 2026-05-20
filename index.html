@@ -187,30 +187,6 @@ audio {
   color: #000;
 }
 
-
-/* ★改善：地図ポップアップの幅を広くする */
-.leaflet-popup-content {
-  min-width: 240px;
-}
-
-/* ★改善：地図ポップアップ内の再生バーの幅を確保する */
-.leaflet-popup-content audio {
-  width: 240px;
-  max-width: 100%;
-  display: block;
-}
-
-/* ★改善：スマホでは少しだけ小さくする */
-@media (max-width: 599px) {
-  .leaflet-popup-content {
-    min-width: 220px;
-  }
-
-  .leaflet-popup-content audio {
-    width: 220px;
-  }
-}
-
 /* モバイル対応 */
 @media (max-width: 599px) {
   .image-wrapper img {
@@ -351,6 +327,7 @@ audio {
     for(let i = 0, len = audios.length; i < len; i++){
       if(audios[i] !== e.target){
         audios[i].pause();
+        audios[i].currentTime = 0;
       }
     }
   }, true);
