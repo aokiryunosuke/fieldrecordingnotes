@@ -187,6 +187,30 @@ audio {
   color: #000;
 }
 
+
+/* ★追加：画像がない地図ポップアップでも再生ボタンが見える幅にする */
+.leaflet-popup-content {
+  min-width: 240px;
+}
+
+/* ★追加：地図ポップアップ内の再生バーの幅を確保する */
+.leaflet-popup-content audio {
+  width: 240px;
+  max-width: 100%;
+  display: block;
+}
+
+/* ★追加：スマホでは少しだけ小さくする */
+@media (max-width: 599px) {
+  .leaflet-popup-content {
+    min-width: 220px;
+  }
+
+  .leaflet-popup-content audio {
+    width: 220px;
+  }
+}
+
 /* モバイル対応 */
 @media (max-width: 599px) {
   .image-wrapper img {
