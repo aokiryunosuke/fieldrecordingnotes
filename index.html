@@ -5,12 +5,14 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Field Recording Notes</title>
+
 <!-- ファビコン -->
 <link href="/fieldrecordingnotes/favicon16.png" rel="icon" sizes="16x16" type="image/png"/>
 <link href="/fieldrecordingnotes/favicon32.png" rel="icon" sizes="32x32" type="image/png"/>
 <link href="/fieldrecordingnotes/favicon48.png" rel="icon" sizes="48x48" type="image/png"/>
 <link href="/fieldrecordingnotes/favicon192.png" rel="icon" sizes="192x192" type="image/png"/>
 <link href="/fieldrecordingnotes/faviconapple.png" rel="apple-touch-icon"/>
+
 <!-- SEO -->
 <meta content="フィールドレコーディングのデータ集" name="description"/>
 <meta content="index, follow" name="robots"/>
@@ -18,18 +20,19 @@
 <meta content="フィールドレコーディングのデータ集" property="og:description"/>
 <meta content="website" property="og:type"/>
 <meta content="ja_JP" property="og:locale"/>
+
 <!-- フォントとLeaflet -->
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&amp;display=swap" rel="stylesheet"/>
 <link href="https://unpkg.com/leaflet/dist/leaflet.css" rel="stylesheet"/>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
 <style>
-   
 body {
   font-family: 'Noto Sans JP', sans-serif;
   margin: 0;
   padding: 20px;
   background-color: #e0e0d1;
-  position: relative; /* ボタンの絶対配置に必要 */
+  position: relative;
 }
 
 h1 {
@@ -37,7 +40,7 @@ h1 {
   margin-bottom: 1rem;
   font-size: 1rem;
   font-weight: 400;
-  position: relative; /* 概要ボタンを重ねるために必要 */
+  position: relative;
 }
 
 #search {
@@ -57,6 +60,7 @@ h1 {
   margin-bottom: 2rem;
   border: 2px solid #888;
   border-radius: 8px;
+  position: relative;
 }
 
 .file-item {
@@ -77,8 +81,8 @@ h1 {
 
 .image-wrapper img {
   width: 100px;
-  height: auto;               /* ← 追加：比率を保つ */
-  object-fit: contain;        /* ← 追加：切り取り防止 */
+  height: auto;
+  object-fit: contain;
   cursor: pointer;
   position: relative;
   border-radius: 0;
@@ -183,8 +187,21 @@ audio {
   color: #888;
   cursor: pointer;
 }
+
 #closeSummary:hover {
   color: #000;
+}
+
+/* ★追加：地図ポップアップの幅を確保 */
+.leaflet-popup-content {
+  min-width: 220px;
+}
+
+/* ★追加：ポップアップ内の音声プレイヤーをちゃんと表示 */
+.leaflet-popup-content audio {
+  width: 220px;
+  max-width: 100%;
+  display: block;
 }
 
 /* モバイル対応 */
@@ -197,7 +214,7 @@ audio {
 
   #summaryButton {
     position: absolute;
-    top: 33px;       /* 検索欄の上に合わせる（適宜微調整） */
+    top: 33px;
     right: 30px;
     padding: 6px 10px;
     font-size: 0.85rem;
@@ -206,61 +223,23 @@ audio {
   #summaryBox {
     width: 93%;
     right: 3%;
-    top: 130px;      /* ボタンより少し下に出す */
+    top: 130px;
     max-height: 70vh;
     font-size: 0.9rem;
     padding: 14px 12px 10px 12px;
   }
-}
-    #fullscreenMapButton {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  z-index: 1001;
-  padding: 8px 14px;
-  background-color: white;
-  color: black;
-  border: 2px solid #999;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  z-index: 1001;
-  padding: 4px 8px;
-  background-color: white;
-  color: black;
-  border: 2px solid #aaa;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  cursor: pointer;
+
+  /* ★追加：スマホではポップアップを少し小さく */
+  .leaflet-popup-content {
+    min-width: 200px;
+  }
+
+  .leaflet-popup-content audio {
+    width: 200px;
+  }
 }
 
-.fullscreen-map { /* ★追加 */
-  position: fixed !important;
-  top: 0;
-  left: 0;
-  height: 100vh !important;
-  width: 100vw !important;
-  z-index: 1000;
-}
-
-#map {
-  position: relative;
-}
 #fullscreenMapButton {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  z-index: 1001;
-  padding: 8px 14px;
-  background-color: white;
-  color: black;
-  border: 2px solid #999;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  cursor: pointer;
   position: absolute;
   bottom: 10px;
   left: 10px;
@@ -273,6 +252,7 @@ audio {
   font-size: 0.75rem;
   cursor: pointer;
 }
+
 .fullscreen-map {
   position: fixed !important;
   top: 0;
@@ -283,7 +263,6 @@ audio {
 }
 
 @media (max-width: 599px) {
-  /* 地図拡大時のボタン調整 */
   .fullscreen-map #fullscreenMapButton {
     position: fixed;
     bottom: 14px !important;
@@ -305,13 +284,11 @@ audio {
     z-index: 1002;
   }
 
-  /* 通常状態のトップボタン調整 */
   #topButton {
     bottom: 20px;
     right: 20px;
   }
 
-  /* 通常状態の地図ボタン */
   #fullscreenMapButton {
     bottom: 20px;
     left: 20px;
@@ -319,6 +296,7 @@ audio {
 }
 </style>
 </head>
+
 <body>
 
 <script>
@@ -337,7 +315,7 @@ audio {
 <h1>Field Recording Notes</h1>
 
 <button id="summaryButton">概要</button>
-<!-- 概要ボックス -->
+
 <div id="summaryBox">
   <button aria-label="閉じる" id="closeSummary">×</button>
   <p>使い方は青木に訊いてください。何か不具合や使いにくいところがありましたら、インスタグラム＠aoki_ryunosukeのDMまでお願いいたします。</p>
@@ -345,7 +323,10 @@ audio {
 
 <input id="search" placeholder="検索（例: 250608_0026、三戸浜、鳥）" type="text"/>
 
-<div id="map"><button id="fullscreenMapButton">拡大</button></div>
+<div id="map">
+  <button id="fullscreenMapButton">拡大</button>
+</div>
+
 <div id="file-list"></div>
 
 <button id="topButton" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">↑ トップへ</button>
@@ -358,6 +339,7 @@ audio {
   const files = [
     {
       name: "20250608_1.wav",
+      images: ["20250608_1_1.jpg", "20250608_1_3.jpg"],
       title: "20250608_1",
       comment: "東京都目黒区駒場4丁目3-55付近、駒場公園。写真：iPhone15、録音：Zoom H4nPro IL80。15:00、曇り。湿気、気だるい暑さ。複数の鳥の鳴き声が聴こえる。駒場公園、子供が遠くの遊具で遊んでいる、ピクニックをする人々、（人が主体であるような傾向はあるが）、人と自然が共存しているようで、心ごごちの良さがある。場所が広いのがわかる。曇空のようなあわい水色のかかった白のような色がする。静じゃくが常にある。",
       lat: 35.6615061,
@@ -506,13 +488,13 @@ audio {
       comment: "大阪市大深町。写真：iPhone15、録音：Tascam DR-07X IL80。06:40、晴れ。クマゼミの鳴き声。徐々に啼き方が変化してゆくのがわかる。",
       lat: 34.70500,
       lng: 135.49670
- 　　},
+    },
     {
       name: "250914_0027.wav",
       images: ["250914_0027.jpg"],
       title: "250914_0027",
       comment: "八王子市高尾町、高尾山六号路にて。写真：iPhone 15、録音：Tascam DR-07X IL80。13:30、晴れ。六号路に流れる小川の音が聞こえる。暑い夏も涼しくなるようであって、そして実際に涼しかった。",
- 　    lat: 35.62600,
+      lat: 35.62600,
       lng: 139.25401
     },
     {
@@ -547,7 +529,7 @@ audio {
       lat: 35.66005,
       lng: 139.70061
     },
-   　{
+    {
       name: "251229_0034.wav",
       images: ["251229_0034.jpg"],
       title: "251229_0034",
@@ -564,10 +546,8 @@ audio {
 
   const markers = [];
 
-  // ★追加：検索で作り直さない（表示/非表示のみ）
-  const renderedItems = []; // { el, searchText }
+  const renderedItems = [];
 
-  // モーダルの共通UI制御（そのまま）
   function showModalWithImage(imgSrc) {
     modalImg.src = imgSrc;
 
@@ -589,13 +569,14 @@ audio {
     closeModalBtn.style.border = "none";
     closeModalBtn.style.zIndex = 1002;
     closeModalBtn.style.cursor = "pointer";
+
     closeModalBtn.addEventListener("click", () => {
       modal.classList.remove("show");
-      const closeBtn = document.getElementById('modalCloseButton');
+
+      const closeBtn = document.getElementById("modalCloseButton");
       if (closeBtn) closeBtn.remove();
-      uiElements.forEach(el => el && (el.style.display = ''));
+
       uiElements.forEach(el => el && (el.style.display = ""));
-      closeModalBtn.remove();
     });
 
     modal.classList.add("show");
@@ -619,8 +600,9 @@ audio {
       const titleEl = document.createElement("div");
       titleEl.className = "title";
       titleEl.textContent = file.title;
+
       titleEl.onclick = () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: "smooth" });
         map.setView([file.lat, file.lng], 10);
         if (markers[index]) markers[index].openPopup();
       };
@@ -633,7 +615,6 @@ audio {
         img.src = imgSrc;
         img.alt = file.title;
 
-        // ★軽量化：遅延読み込み（見た目は変えない）
         img.loading = "lazy";
         img.decoding = "async";
 
@@ -644,8 +625,6 @@ audio {
       const audio = document.createElement("audio");
       audio.controls = true;
       audio.src = file.name;
-
-      // ★軽量化：初期ロード抑制（見た目は変えない）
       audio.preload = "none";
 
       const comment = document.createElement("div");
@@ -669,8 +648,9 @@ audio {
 
   function filterList(filter = "") {
     const q = filter.toLowerCase().trim();
+
     renderedItems.forEach(({ el, searchText }) => {
-      const match = (q === "") || searchText.includes(q);
+      const match = q === "" || searchText.includes(q);
       el.style.display = match ? "" : "none";
     });
   }
@@ -679,50 +659,50 @@ audio {
     if (e.target === modal || e.target === modalImg) {
       modal.classList.remove("show");
 
-      // ✕ボタン削除
-      const closeBtn = document.getElementById('modalCloseButton');
+      const closeBtn = document.getElementById("modalCloseButton");
       if (closeBtn) closeBtn.remove();
 
-      // UI要素を再表示
       const uiElements = [
         document.getElementById("summaryButton"),
         document.getElementById("topButton"),
         document.getElementById("fullscreenMapButton")
       ];
-      uiElements.forEach(el => el && (el.style.display = ''));
+
+      uiElements.forEach(el => el && (el.style.display = ""));
     }
   }
+
   window.closeModal = closeModal;
 
-  // === 概要表示の要素取得 ===
   const summaryBtn = document.getElementById("summaryButton");
   const summaryBox = document.getElementById("summaryBox");
   const closeSummary = document.getElementById("closeSummary");
 
-  // === ボタンで開閉 ===
   function toggleSummary() {
     const isVisible = summaryBox.style.display === "block";
     summaryBox.style.display = isVisible ? "none" : "block";
   }
+
   summaryBtn.addEventListener("click", toggleSummary);
 
-  // === ×ボタンで閉じる ===
   closeSummary.addEventListener("click", () => {
     summaryBox.style.display = "none";
   });
 
-  // === ボックス外をクリックしたら閉じる ===
   document.addEventListener("click", (event) => {
-    const isInside = summaryBox.contains(event.target) || summaryBtn.contains(event.target);
+    const isInside =
+      summaryBox.contains(event.target) ||
+      summaryBtn.contains(event.target);
+
     if (!isInside) {
       summaryBox.style.display = "none";
     }
   });
 
-  // === Map ===
-  const map = L.map('map').setView([36.2, 138.2], 6);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
+  const map = L.map("map").setView([36.2, 138.2], 6);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "&copy; OpenStreetMap contributors"
   }).addTo(map);
 
   files.forEach((file, index) => {
@@ -731,33 +711,39 @@ audio {
       const marker = L.marker([file.lat, file.lng]).addTo(map);
 
       const popupContent = document.createElement("div");
+
       const title = document.createElement("strong");
       title.textContent = file.title;
       popupContent.appendChild(title);
       popupContent.appendChild(document.createElement("br"));
 
-      const img = document.createElement("img");
-      img.src = file.images[0];
-      img.style.width = "100px";
-      img.style.marginTop = "5px";
-      img.style.cursor = "pointer";
+      /*
+        ★修正部分
+        画像があるときだけ img を作る。
+        images: [] のときは画像タグを作らない。
+      */
+      if (file.images && file.images.length > 0) {
+        const img = document.createElement("img");
+        img.src = file.images[0];
+        img.style.width = "100px";
+        img.style.marginTop = "5px";
+        img.style.cursor = "pointer";
 
-      // ★軽量化：遅延読み込み
-      img.loading = "lazy";
-      img.decoding = "async";
+        img.loading = "lazy";
+        img.decoding = "async";
 
-      img.onclick = () => showModalWithImage(img.src);
+        img.onclick = () => showModalWithImage(img.src);
 
-      popupContent.appendChild(img);
-      popupContent.appendChild(document.createElement("br"));
+        popupContent.appendChild(img);
+        popupContent.appendChild(document.createElement("br"));
+      }
 
       const audio = document.createElement("audio");
       audio.controls = true;
       audio.src = file.name;
-      audio.style.width = "100%";
+      audio.style.width = "220px";
+      audio.style.maxWidth = "100%";
       audio.style.marginTop = "5px";
-
-      // ★軽量化：初期ロード抑制
       audio.preload = "none";
 
       popupContent.appendChild(audio);
@@ -765,18 +751,20 @@ audio {
 
       const button = document.createElement("button");
       button.textContent = "詳細へ移動";
+
       button.onclick = () => {
         const target = document.getElementById(id);
-        if (target) target.scrollIntoView({ behavior: 'smooth' });
+        if (target) target.scrollIntoView({ behavior: "smooth" });
 
         if (isFullscreen) {
-          document.getElementById('map').classList.remove('fullscreen-map');
-          document.getElementById('fullscreenMapButton').textContent = '拡大';
+          document.getElementById("map").classList.remove("fullscreen-map");
+          document.getElementById("fullscreenMapButton").textContent = "拡大";
           isFullscreen = false;
           map.invalidateSize();
           if (openedPopup) openedPopup.openPopup();
         }
       };
+
       popupContent.appendChild(button);
 
       marker.bindPopup(popupContent);
@@ -786,21 +774,20 @@ audio {
     }
   });
 
-  // ★重要：リストは1回だけ作って、検索は表示切替のみ
   buildListOnce();
   filterList("");
 
-  // ★検索：デバウンス + フィルタだけ
   let _searchTimer = null;
+
   searchInput.addEventListener("input", () => {
     if (_searchTimer) clearTimeout(_searchTimer);
+
     _searchTimer = setTimeout(() => {
       filterList(searchInput.value);
     }, 150);
   });
 </script>
 
-<!-- ★ 地図最大化ボタン（重複していたスクリプトは1本化） -->
 <script>
   const fullscreenBtn = document.getElementById("fullscreenMapButton");
   let isFullscreen = false;
@@ -810,8 +797,14 @@ audio {
     openedPopup = map._popup && map._popup._source;
 
     let openedPopupMarker = null;
+
     markers.forEach(marker => {
-      if (marker && marker.getPopup && marker.getPopup() && marker.getPopup().isOpen()) {
+      if (
+        marker &&
+        marker.getPopup &&
+        marker.getPopup() &&
+        marker.getPopup().isOpen()
+      ) {
         openedPopupMarker = marker;
       }
     });
@@ -830,6 +823,7 @@ audio {
 
     setTimeout(() => {
       map.invalidateSize();
+
       if (openedPopup) openedPopup.openPopup();
       if (openedPopupMarker) openedPopupMarker.openPopup();
     }, 300);
@@ -837,11 +831,14 @@ audio {
 
   document.getElementById("topButton").addEventListener("click", () => {
     const mapElement = document.getElementById("map");
+
     if (isFullscreen) {
       mapElement.classList.remove("fullscreen-map");
       fullscreenBtn.textContent = "拡大";
       map.invalidateSize();
+
       if (openedPopup) openedPopup.openPopup();
+
       isFullscreen = false;
     }
   });
