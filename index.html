@@ -192,12 +192,12 @@ audio {
   color: #000;
 }
 
-/* ★追加：地図ポップアップの幅を確保 */
+/* 地図ポップアップの幅を確保 */
 .leaflet-popup-content {
   min-width: 220px;
 }
 
-/* ★追加：ポップアップ内の音声プレイヤーをちゃんと表示 */
+/* ポップアップ内の音声プレイヤーをちゃんと表示 */
 .leaflet-popup-content audio {
   width: 220px;
   max-width: 100%;
@@ -229,7 +229,6 @@ audio {
     padding: 14px 12px 10px 12px;
   }
 
-  /* ★追加：スマホではポップアップを少し小さく */
   .leaflet-popup-content {
     min-width: 200px;
   }
@@ -545,7 +544,6 @@ audio {
   const modalImg = document.getElementById("modalImage");
 
   const markers = [];
-
   const renderedItems = [];
 
   function showModalWithImage(imgSrc) {
@@ -625,6 +623,8 @@ audio {
       const audio = document.createElement("audio");
       audio.controls = true;
       audio.src = file.name;
+
+      /* 一覧側は軽量化のため none のまま */
       audio.preload = "none";
 
       const comment = document.createElement("div");
@@ -718,9 +718,8 @@ audio {
       popupContent.appendChild(document.createElement("br"));
 
       /*
-        ★修正部分
-        画像があるときだけ img を作る。
-        images: [] のときは画像タグを作らない。
+        画像があるときだけ画像を表示。
+        images: [] の場合は画像タグを作らない。
       */
       if (file.images && file.images.length > 0) {
         const img = document.createElement("img");
@@ -744,7 +743,13 @@ audio {
       audio.style.width = "220px";
       audio.style.maxWidth = "100%";
       audio.style.marginTop = "5px";
-      audio.preload = "none";
+
+      /*
+        重要：
+        地図ポップアップ内の audio は none ではなく metadata。
+        これで再生ボタンを押したときに読み込みやすくする。
+      */
+      audio.preload = "metadata";
 
       popupContent.appendChild(audio);
       popupContent.appendChild(document.createElement("br"));
