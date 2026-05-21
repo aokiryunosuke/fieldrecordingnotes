@@ -177,9 +177,15 @@ h1 {
   width: 132px;
   max-width: 100%;
   min-width: 0;
-  margin: 6px auto 4px;
+  margin: 6px auto 10px;
   padding: 2px 5px;
   gap: 4px;
+}
+
+.map-popup-detail-button {
+  display: block;
+  margin: 4px auto 0;
+  padding: 4px 9px;
 }
 
 .leaflet-popup-content .custom-audio-button {
@@ -530,7 +536,7 @@ h1 {
     },
     {
       name: "250609_0026.mp3",
-      images: ["250609_0026.jpg", "250609_0026_3.jpg"],
+      images: ["250609_0026_1.jpg", "250609_0026_3.jpg"],
       title: "250609_0026",
       comment: "神奈川県三浦市南下浦町菊名付近。写真：iPhone15、録音：Tascam DR-07X IL80。15:50、小雨。小雨がぽつぽつ降っている。三浦海岸から坂をのぼったところにある。上に葉々があり、雨よけになった。葉々が雨によってなっている。三浦海岸で車が走っている音がきこえる。ポツンとどこでもない場所から、広い周りの音を聞いているという印象である。",
       lat: 35.1781197,
@@ -827,7 +833,8 @@ h1 {
 
       const comment = document.createElement("div");
       comment.className = "comment";
-      comment.textContent = file.comment;
+      // comment 内の <br> を改行として表示する
+      comment.innerHTML = file.comment;
 
       content.appendChild(titleEl);
       content.appendChild(wrapper);
@@ -849,6 +856,19 @@ h1 {
     renderedItems.forEach(({ el, searchText }) => {
       const match = (q === "") || searchText.includes(q);
       el.style.display = match ? "" : "none";
+    });
+  }
+
+  function scrollItemToCenter(target) {
+    if (!target) return;
+
+    const rect = target.getBoundingClientRect();
+    const targetTop = window.pageYOffset + rect.top;
+    const centeredTop = targetTop - (window.innerHeight / 2) + (rect.height / 2);
+
+    window.scrollTo({
+      top: Math.max(centeredTop, 0),
+      behavior: 'smooth'
     });
   }
 
@@ -933,9 +953,9 @@ h1 {
 
       const button = document.createElement("button");
       button.textContent = "詳細へ移動";
+      button.className = "map-popup-detail-button";
       button.onclick = () => {
         const target = document.getElementById(id);
-        if (target) target.scrollIntoView({ behavior: 'smooth' });
 
         if (isFullscreen) {
           document.getElementById('map').classList.remove('fullscreen-map');
@@ -943,6 +963,10 @@ h1 {
           isFullscreen = false;
           map.invalidateSize();
           if (openedPopup) openedPopup.openPopup();
+
+          setTimeout(() => scrollItemToCenter(target), 120);
+        } else {
+          scrollItemToCenter(target);
         }
       };
       popupContent.appendChild(button);
