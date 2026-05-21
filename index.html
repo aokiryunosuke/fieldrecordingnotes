@@ -119,7 +119,10 @@ h1 {
 }
 
 .custom-audio-progress {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 0;
+  margin: 0;
   height: 2px;
   appearance: none;
   -webkit-appearance: none;
@@ -149,16 +152,57 @@ h1 {
   display: none;
 }
 
+.map-popup-content {
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.map-popup-title {
+  display: block;
+  text-align: center;
+  font-size: 1rem;
+  margin-bottom: 7px;
+}
+
+.map-popup-image {
+  display: block;
+  width: 130px;
+  max-width: 100%;
+  height: auto;
+  margin: 5px auto 8px;
+  cursor: pointer;
+}
+
 .leaflet-popup-content .custom-audio {
-  min-width: 220px;
-  margin-top: 8px;
-  padding: 4px 7px;
+  width: 132px;
+  max-width: 100%;
+  min-width: 0;
+  margin: 6px auto 4px;
+  padding: 2px 5px;
+  gap: 4px;
 }
 
 .leaflet-popup-content .custom-audio-button {
-  width: 26px;
-  height: 26px;
-  font-size: 0.7rem;
+  width: 18px;
+  height: 18px;
+  font-size: 0.55rem;
+}
+
+.leaflet-popup-content .custom-audio-progress {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 0;
+  height: 1.5px;
+}
+
+.leaflet-popup-content .custom-audio-progress::-webkit-slider-thumb {
+  width: 6px;
+  height: 6px;
+}
+
+.leaflet-popup-content .custom-audio-progress::-moz-range-thumb {
+  width: 6px;
+  height: 6px;
 }
 
 .title {
@@ -486,7 +530,7 @@ h1 {
     },
     {
       name: "250609_0026.mp3",
-      images: ["250609_0026.jpg", "250609_0026_3.jpg"],
+      images: ["250609_0026_1.jpg", "250609_0026_3.jpg"],
       title: "250609_0026",
       comment: "神奈川県三浦市南下浦町菊名付近。写真：iPhone15、録音：Tascam DR-07X IL80。15:50、小雨。小雨がぽつぽつ降っている。三浦海岸から坂をのぼったところにある。上に葉々があり、雨よけになった。葉々が雨によってなっている。三浦海岸で車が走っている音がきこえる。ポツンとどこでもない場所から、広い周りの音を聞いているという印象である。",
       lat: 35.1781197,
@@ -864,16 +908,16 @@ h1 {
       const marker = L.marker([file.lat, file.lng]).addTo(map);
 
       const popupContent = document.createElement("div");
+      popupContent.className = "map-popup-content";
+
       const title = document.createElement("strong");
+      title.className = "map-popup-title";
       title.textContent = file.title;
       popupContent.appendChild(title);
-      popupContent.appendChild(document.createElement("br"));
 
       const img = document.createElement("img");
       img.src = file.images[0];
-      img.style.width = "100px";
-      img.style.marginTop = "5px";
-      img.style.cursor = "pointer";
+      img.className = "map-popup-image";
 
       // ★軽量化：遅延読み込み
       img.loading = "lazy";
@@ -882,12 +926,10 @@ h1 {
       img.onclick = () => showModalWithImage(img.src);
 
       popupContent.appendChild(img);
-      popupContent.appendChild(document.createElement("br"));
 
       const audio = createCustomAudioPlayer(file.name);
 
       popupContent.appendChild(audio);
-      popupContent.appendChild(document.createElement("br"));
 
       const button = document.createElement("button");
       button.textContent = "詳細へ移動";
