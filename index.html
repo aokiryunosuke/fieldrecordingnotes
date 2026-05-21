@@ -68,6 +68,22 @@ h1 {
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
+.image-wrapper {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.image-wrapper img {
+  width: 100px;
+  height: auto;               /* ← 追加：比率を保つ */
+  object-fit: contain;        /* ← 追加：切り取り防止 */
+  cursor: pointer;
+  position: relative;
+  border-radius: 0;
+}
+
 audio {
   width: 100%;
   margin-top: 10px;
@@ -85,6 +101,27 @@ audio {
 .comment {
   margin-top: 8px;
   color: #555;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.9);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal.show {
+  display: flex;
+}
+
+.modal img {
+  max-width: 90%;
+  max-height: 80vh;
+  border-radius: 0;
 }
 
 #topButton {
@@ -150,33 +187,15 @@ audio {
   color: #000;
 }
 
-
-/* ★追加：画像がない地図ポップアップでも再生ボタンが見える幅にする */
-.leaflet-popup-content {
-  min-width: 240px;
-}
-
-/* ★追加：地図ポップアップ内の再生バーの幅を確保する */
-.leaflet-popup-content audio {
-  width: 240px;
-  max-width: 100%;
-  display: block;
-}
-
-/* ★追加：スマホでは少しだけ小さくする */
-@media (max-width: 599px) {
-  .leaflet-popup-content {
-    min-width: 220px;
-  }
-
-  .leaflet-popup-content audio {
-    width: 220px;
-  }
-}
-
 /* モバイル対応 */
 @media (max-width: 599px) {
-#summaryButton {
+  .image-wrapper img {
+    width: 60px;
+    height: auto;
+    object-fit: contain;
+  }
+
+  #summaryButton {
     position: absolute;
     top: 33px;       /* 検索欄の上に合わせる（適宜微調整） */
     right: 30px;
@@ -331,11 +350,15 @@ audio {
 
 <button id="topButton" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">↑ トップへ</button>
 
+<div class="modal" id="imageModal" onclick="closeModal(event)">
+  <img alt="拡大画像" id="modalImage" src=""/>
+</div>
+
 <script>
   const files = [
     {
       name: "20250608_1.wav",
-      images: ["20250608_1.jpg", "20250608_2.jpg"],
+      images: ["20250608_1_1.jpg", "20250608_1_3.jpg"],
       title: "20250608_1",
       comment: "⚫︎東京都目黒区駒場4丁目3-55付近、駒場公園。⚫︎Zoom H4nPro IL80。15:00、曇り。<br>湿気、気だるい暑さ。複数の鳥の鳴き声が聴こえる。駒場公園、子供が遠くの遊具で遊んでいる、ピクニックをする人々、（人が主体であるような傾向はあるが）、人と自然が共存しているようで、心ごごちの良さがある。場所が広いのがわかる。曇空のようなあわい水色のかかった白のような色がする。静じゃくが常にある。",
       lat: 35.6615061,
@@ -537,11 +560,50 @@ audio {
 
   const fileList = document.getElementById("file-list");
   const searchInput = document.getElementById("search");
+  const modal = document.getElementById("imageModal");
+  const modalImg = document.getElementById("modalImage");
 
   const markers = [];
 
   // ★追加：検索で作り直さない（表示/非表示のみ）
   const renderedItems = []; // { el, searchText }
+
+  // モーダルの共通UI制御（そのまま）
+  function showModalWithImage(imgSrc) {
+    modalImg.src = imgSrc;
+
+    const uiElements = [
+      document.getElementById("summaryButton"),
+      document.getElementById("topButton"),
+      document.getElementById("fullscreenMapButton")
+    ];
+
+    const closeModalBtn = document.createElement("button");
+    closeModalBtn.id = "modalCloseButton";
+    closeModalBtn.textContent = "✕";
+    closeModalBtn.style.position = "fixed";
+    closeModalBtn.style.top = "20px";
+    closeModalBtn.style.right = "30px";
+    closeModalBtn.style.fontSize = "2rem";
+    closeModalBtn.style.color = "white";
+    closeModalBtn.style.background = "none";
+    closeModalBtn.style.border = "none";
+    closeModalBtn.style.zIndex = 1002;
+    closeModalBtn.style.cursor = "pointer";
+    closeModalBtn.addEventListener("click", () => {
+      modal.classList.remove("show");
+      const closeBtn = document.getElementById('modalCloseButton');
+      if (closeBtn) closeBtn.remove();
+      uiElements.forEach(el => el && (el.style.display = ''));
+      uiElements.forEach(el => el && (el.style.display = ""));
+      closeModalBtn.remove();
+    });
+
+    modal.classList.add("show");
+    uiElements.forEach(el => el && (el.style.display = "none"));
+    document.body.appendChild(closeModalBtn);
+  }
+
   function buildListOnce() {
     fileList.innerHTML = "";
     renderedItems.length = 0;
@@ -563,7 +625,24 @@ audio {
         map.setView([file.lat, file.lng], 10);
         if (markers[index]) markers[index].openPopup();
       };
-const audio = document.createElement("audio");
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "image-wrapper";
+
+      file.images.forEach(imgSrc => {
+        const img = document.createElement("img");
+        img.src = imgSrc;
+        img.alt = file.title;
+
+        // ★軽量化：遅延読み込み（見た目は変えない）
+        img.loading = "lazy";
+        img.decoding = "async";
+
+        img.onclick = () => showModalWithImage(imgSrc);
+        wrapper.appendChild(img);
+      });
+
+      const audio = document.createElement("audio");
       audio.controls = true;
       audio.src = file.name;
 
@@ -572,9 +651,10 @@ const audio = document.createElement("audio");
 
       const comment = document.createElement("div");
       comment.className = "comment";
-      comment.innerHTML = file.comment;
+      comment.textContent = file.comment;
 
       content.appendChild(titleEl);
+      content.appendChild(wrapper);
       content.appendChild(audio);
       content.appendChild(comment);
 
@@ -595,7 +675,27 @@ const audio = document.createElement("audio");
       el.style.display = match ? "" : "none";
     });
   }
-// === 概要表示の要素取得 ===
+
+  function closeModal(e) {
+    if (e.target === modal || e.target === modalImg) {
+      modal.classList.remove("show");
+
+      // ✕ボタン削除
+      const closeBtn = document.getElementById('modalCloseButton');
+      if (closeBtn) closeBtn.remove();
+
+      // UI要素を再表示
+      const uiElements = [
+        document.getElementById("summaryButton"),
+        document.getElementById("topButton"),
+        document.getElementById("fullscreenMapButton")
+      ];
+      uiElements.forEach(el => el && (el.style.display = ''));
+    }
+  }
+  window.closeModal = closeModal;
+
+  // === 概要表示の要素取得 ===
   const summaryBtn = document.getElementById("summaryButton");
   const summaryBox = document.getElementById("summaryBox");
   const closeSummary = document.getElementById("closeSummary");
@@ -636,7 +736,23 @@ const audio = document.createElement("audio");
       title.textContent = file.title;
       popupContent.appendChild(title);
       popupContent.appendChild(document.createElement("br"));
-const audio = document.createElement("audio");
+
+      const img = document.createElement("img");
+      img.src = file.images[0];
+      img.style.width = "100px";
+      img.style.marginTop = "5px";
+      img.style.cursor = "pointer";
+
+      // ★軽量化：遅延読み込み
+      img.loading = "lazy";
+      img.decoding = "async";
+
+      img.onclick = () => showModalWithImage(img.src);
+
+      popupContent.appendChild(img);
+      popupContent.appendChild(document.createElement("br"));
+
+      const audio = document.createElement("audio");
       audio.controls = true;
       audio.src = file.name;
       audio.style.width = "100%";
