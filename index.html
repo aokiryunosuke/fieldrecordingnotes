@@ -572,7 +572,7 @@ const audio = document.createElement("audio");
 
       const comment = document.createElement("div");
       comment.className = "comment";
-      comment.textContent = file.comment;
+      comment.innerHTML = file.comment;
 
       content.appendChild(titleEl);
       content.appendChild(audio);
