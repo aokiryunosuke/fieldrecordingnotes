@@ -222,6 +222,27 @@ h1 {
   height: 6px;
 }
 
+/* 地図ポップアップの背景を半透明にする */
+.leaflet-popup-content-wrapper {
+  background: rgba(255, 255, 255, 0.36);
+  box-shadow: 0 1px 7px rgba(0, 0, 0, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(1.2px);
+}
+
+.leaflet-popup-tip {
+  background: rgba(255, 255, 255, 0.36);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.10);
+}
+
+.leaflet-popup-content {
+  margin: 8px 10px;
+}
+
+.leaflet-popup-close-button {
+  text-shadow: 0 0 3px #fff;
+}
+
 .title {
   font-weight: bold;
   font-size: 1.2rem;
@@ -743,7 +764,22 @@ h1 {
     document.body.appendChild(closeModalBtn);
   }
 
-  function createCustomAudioPlayer(src) {
+  const persistentPopupAudios = {};
+
+  function getPersistentPopupAudio(src) {
+    if (!persistentPopupAudios[src]) {
+      const audio = document.createElement("audio");
+      audio.src = src;
+      audio.preload = "none";
+      audio.style.display = "none";
+      audio.dataset.persistentPopupAudio = "true";
+      document.body.appendChild(audio);
+      persistentPopupAudios[src] = audio;
+    }
+    return persistentPopupAudios[src];
+  }
+
+  function createCustomAudioPlayer(src, options = {}) {
     const player = document.createElement("div");
     player.className = "custom-audio";
 
@@ -762,9 +798,26 @@ h1 {
     progress.step = "0.1";
     progress.setAttribute("aria-label", "再生位置");
 
-    const audio = document.createElement("audio");
-    audio.src = src;
-    audio.preload = "none";
+    // ポップアップ内の音声だけは、閉じても止まらないように
+    // audio要素をポップアップの外（body直下）に置く。
+    const audio = options.persistent
+      ? getPersistentPopupAudio(src)
+      : document.createElement("audio");
+
+    if (!options.persistent) {
+      audio.src = src;
+      audio.preload = "none";
+    }
+
+    function syncPlayerState() {
+      button.textContent = audio.paused ? "▶" : "Ⅱ";
+      button.setAttribute("aria-label", audio.paused ? "再生" : "一時停止");
+      if (audio.duration) {
+        progress.value = String((audio.currentTime / audio.duration) * 100);
+      } else {
+        progress.value = "0";
+      }
+    }
 
     button.addEventListener("click", () => {
       if (audio.paused) {
@@ -774,15 +827,8 @@ h1 {
       }
     });
 
-    audio.addEventListener("play", () => {
-      button.textContent = "Ⅱ";
-      button.setAttribute("aria-label", "一時停止");
-    });
-
-    audio.addEventListener("pause", () => {
-      button.textContent = "▶";
-      button.setAttribute("aria-label", "再生");
-    });
+    audio.addEventListener("play", syncPlayerState);
+    audio.addEventListener("pause", syncPlayerState);
 
     audio.addEventListener("ended", () => {
       button.textContent = "▶";
@@ -801,9 +847,13 @@ h1 {
       }
     });
 
+    syncPlayerState();
     player.appendChild(button);
     player.appendChild(progress);
-    player.appendChild(audio);
+
+    if (!options.persistent) {
+      player.appendChild(audio);
+    }
 
     return player;
   }
@@ -979,7 +1029,7 @@ h1 {
 
       popupContent.appendChild(img);
 
-      const audio = createCustomAudioPlayer(file.name);
+      const audio = createCustomAudioPlayer(file.name, { persistent: true });
 
       popupContent.appendChild(audio);
 
