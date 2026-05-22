@@ -51,15 +51,6 @@ h1 {
   display: block;
 }
 
-#search.search-fixed {
-  position: fixed;
-  top: 10px;
-  left: 20px;
-  right: 20px;
-  width: calc(100% - 40px);
-  z-index: 1003;
-}
-
 #noResultsMessage {
   display: none;
   background: #fff;
@@ -70,6 +61,19 @@ h1 {
   color: #555;
   text-align: center;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+#file-list {
+  display: flex;
+  flex-direction: column;
+}
+
+#unmatchedDivider {
+  display: none;
+  height: 3rem;
+  margin-top: 2rem;
+  border-top: 1px solid #888;
+  order: 9999;
 }
 
 #map {
@@ -944,25 +948,46 @@ h1 {
 
       renderedItems.push({
         el: item,
+        index: index,
         searchText: (file.title + " " + file.comment).toLowerCase()
       });
     });
+
+    const unmatchedDivider = document.createElement("div");
+    unmatchedDivider.id = "unmatchedDivider";
+    fileList.appendChild(unmatchedDivider);
   }
 
   function filterList(filter = "") {
     const q = filter.toLowerCase().trim();
+    const unmatchedDivider = document.getElementById("unmatchedDivider");
     let hitCount = 0;
 
-    renderedItems.forEach(({ el, searchText }) => {
+    renderedItems.forEach(({ el, index, searchText }) => {
       const match = (q === "") || searchText.includes(q);
-      el.style.display = match ? "" : "none";
-      if (match) hitCount++;
+      el.style.display = "";
+
+      if (q === "") {
+        el.style.order = index;
+      } else if (match) {
+        el.style.order = index;
+        hitCount++;
+      } else {
+        el.style.order = 10000 + index;
+      }
     });
 
-    if (q !== "" && hitCount === 0) {
+    if (q === "") {
+      noResultsMessage.style.display = "none";
+      unmatchedDivider.style.display = "none";
+    } else if (hitCount === 0) {
       noResultsMessage.style.display = "block";
+      unmatchedDivider.style.display = "block";
+      unmatchedDivider.style.order = 0;
     } else {
       noResultsMessage.style.display = "none";
+      unmatchedDivider.style.display = "block";
+      unmatchedDivider.style.order = 9999;
     }
   }
 
@@ -1089,32 +1114,31 @@ h1 {
   buildListOnce();
   filterList("");
 
-  // ★検索：入力中は検索窓を画面上部に固定してフィルタする
+  // ★検索：検索窓自体は固定せず、入力時に検索窓が画面上部へ来るようにする
   let _searchTimer = null;
 
-  function updateSearchFixedState() {
-    if (document.activeElement === searchInput && searchInput.value.trim() !== "") {
-      searchInput.classList.add("search-fixed");
-      document.body.style.paddingTop = "70px";
-    } else {
-      searchInput.classList.remove("search-fixed");
-      document.body.style.paddingTop = "";
-    }
+  function scrollSearchToTop() {
+    const rect = searchInput.getBoundingClientRect();
+    const targetTop = window.pageYOffset + rect.top - 12;
+
+    window.scrollTo({
+      top: Math.max(targetTop, 0),
+      behavior: "auto"
+    });
   }
 
-  searchInput.addEventListener("focus", updateSearchFixedState);
+  searchInput.addEventListener("focus", () => {
+    scrollSearchToTop();
+  });
 
   searchInput.addEventListener("input", () => {
-    updateSearchFixedState();
+    scrollSearchToTop();
 
     if (_searchTimer) clearTimeout(_searchTimer);
     _searchTimer = setTimeout(() => {
       filterList(searchInput.value);
+      scrollSearchToTop();
     }, 150);
-  });
-
-  searchInput.addEventListener("blur", () => {
-    setTimeout(updateSearchFixedState, 120);
   });
 </script>
 
