@@ -51,6 +51,27 @@ h1 {
   display: block;
 }
 
+#search.search-fixed {
+  position: fixed;
+  top: 10px;
+  left: 20px;
+  right: 20px;
+  width: calc(100% - 40px);
+  z-index: 1003;
+}
+
+#noResultsMessage {
+  display: none;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 20px;
+  color: #555;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
 #map {
   height: 400px;
   width: 100%;
@@ -507,6 +528,7 @@ h1 {
 <div id="map"><button id="fullscreenMapButton">拡大</button></div>
 
 <input id="search" placeholder="検索（例：晴れ 岩手 鳥 静か）" type="text"/>
+<div id="noResultsMessage">その文字や文字列を含むノートはありませんでした。</div>
 <div id="file-list"></div>
 
 <button id="topButton" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">↑ トップへ</button>
@@ -713,6 +735,7 @@ h1 {
 
   const fileList = document.getElementById("file-list");
   const searchInput = document.getElementById("search");
+  const noResultsMessage = document.getElementById("noResultsMessage");
   const modal = document.getElementById("imageModal");
   const modalImg = document.getElementById("modalImage");
 
@@ -928,10 +951,19 @@ h1 {
 
   function filterList(filter = "") {
     const q = filter.toLowerCase().trim();
+    let hitCount = 0;
+
     renderedItems.forEach(({ el, searchText }) => {
       const match = (q === "") || searchText.includes(q);
       el.style.display = match ? "" : "none";
+      if (match) hitCount++;
     });
+
+    if (q !== "" && hitCount === 0) {
+      noResultsMessage.style.display = "block";
+    } else {
+      noResultsMessage.style.display = "none";
+    }
   }
 
   function scrollItemToCenter(target) {
@@ -1057,13 +1089,32 @@ h1 {
   buildListOnce();
   filterList("");
 
-  // ★検索：デバウンス + フィルタだけ
+  // ★検索：入力中は検索窓を画面上部に固定してフィルタする
   let _searchTimer = null;
+
+  function updateSearchFixedState() {
+    if (document.activeElement === searchInput && searchInput.value.trim() !== "") {
+      searchInput.classList.add("search-fixed");
+      document.body.style.paddingTop = "70px";
+    } else {
+      searchInput.classList.remove("search-fixed");
+      document.body.style.paddingTop = "";
+    }
+  }
+
+  searchInput.addEventListener("focus", updateSearchFixedState);
+
   searchInput.addEventListener("input", () => {
+    updateSearchFixedState();
+
     if (_searchTimer) clearTimeout(_searchTimer);
     _searchTimer = setTimeout(() => {
       filterList(searchInput.value);
     }, 150);
+  });
+
+  searchInput.addEventListener("blur", () => {
+    setTimeout(updateSearchFixedState, 120);
   });
 </script>
 
