@@ -960,14 +960,15 @@ h1 {
 
   function filterList(filter = "") {
     const q = filter.toLowerCase().trim();
+    const keywords = q.split(/\s+/).filter(Boolean);
     const unmatchedDivider = document.getElementById("unmatchedDivider");
     let hitCount = 0;
 
     renderedItems.forEach(({ el, index, searchText }) => {
-      const match = (q === "") || searchText.includes(q);
+      const match = keywords.length === 0 || keywords.every(keyword => searchText.includes(keyword));
       el.style.display = "";
 
-      if (q === "") {
+      if (keywords.length === 0) {
         el.style.order = index;
       } else if (match) {
         el.style.order = index;
@@ -977,7 +978,7 @@ h1 {
       }
     });
 
-    if (q === "") {
+    if (keywords.length === 0) {
       noResultsMessage.style.display = "none";
       unmatchedDivider.style.display = "none";
     } else if (hitCount === 0) {
