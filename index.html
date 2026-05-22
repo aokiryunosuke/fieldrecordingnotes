@@ -152,10 +152,35 @@ h1 {
   border-color: #256b28;
 }
 
-.custom-audio-progress {
+.custom-audio-progress-wrap {
+  position: relative;
   flex: 1 1 auto;
   min-width: 0;
   width: 0;
+  height: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.custom-audio-ticks {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 7px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    to right,
+    transparent 0,
+    transparent calc(var(--tick-step, 100%) - 1px),
+    rgba(47, 125, 50, 0.55) calc(var(--tick-step, 100%) - 1px),
+    rgba(47, 125, 50, 0.55) var(--tick-step, 100%)
+  );
+}
+
+.custom-audio-progress {
+  width: 100%;
   margin: 0;
   height: 2px;
   appearance: none;
@@ -163,6 +188,8 @@ h1 {
   background: #9fca9f;
   border-radius: 999px;
   cursor: pointer;
+  position: relative;
+  z-index: 1;
 }
 
 .custom-audio-progress::-webkit-slider-thumb {
@@ -230,10 +257,18 @@ h1 {
   font-size: 0.68rem;
 }
 
-.leaflet-popup-content .custom-audio-progress {
+.leaflet-popup-content .custom-audio-progress-wrap {
   flex: 1 1 auto;
   min-width: 0;
   width: 0;
+  height: 8px;
+}
+
+.leaflet-popup-content .custom-audio-ticks {
+  height: 5px;
+}
+
+.leaflet-popup-content .custom-audio-progress {
   height: 1.5px;
 }
 
@@ -809,6 +844,12 @@ h1 {
     button.textContent = "▶";
     button.setAttribute("aria-label", "再生");
 
+    const progressWrap = document.createElement("div");
+    progressWrap.className = "custom-audio-progress-wrap";
+
+    const ticks = document.createElement("div");
+    ticks.className = "custom-audio-ticks";
+
     const progress = document.createElement("input");
     progress.className = "custom-audio-progress";
     progress.type = "range";
@@ -829,9 +870,20 @@ h1 {
       audio.preload = "none";
     }
 
+    function updateTicks() {
+      if (audio.duration && audio.duration > 5) {
+        const tickStep = (5 / audio.duration) * 100;
+        ticks.style.setProperty("--tick-step", `${tickStep}%`);
+        ticks.style.display = "";
+      } else {
+        ticks.style.display = "none";
+      }
+    }
+
     function syncPlayerState() {
       button.textContent = audio.paused ? "▶" : "Ⅱ";
       button.setAttribute("aria-label", audio.paused ? "再生" : "一時停止");
+      updateTicks();
       if (audio.duration) {
         progress.value = String((audio.currentTime / audio.duration) * 100);
       } else {
@@ -847,6 +899,8 @@ h1 {
       }
     });
 
+    audio.addEventListener("loadedmetadata", updateTicks);
+    audio.addEventListener("durationchange", updateTicks);
     audio.addEventListener("play", syncPlayerState);
     audio.addEventListener("pause", syncPlayerState);
 
@@ -868,8 +922,10 @@ h1 {
     });
 
     syncPlayerState();
+    progressWrap.appendChild(ticks);
+    progressWrap.appendChild(progress);
     player.appendChild(button);
-    player.appendChild(progress);
+    player.appendChild(progressWrap);
 
     if (!options.persistent) {
       player.appendChild(audio);
