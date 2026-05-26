@@ -655,34 +655,19 @@ h1 {
     }
   }
 
-  function fadeOutAudio(audio, resetTime = false) {
+  function stopAudioImmediately(audio, resetTime = false) {
     const ctx = getAudioContext();
     const nodeSet = getAudioNodeSet(audio);
 
-    if (audio.paused) {
-      if (resetTime) audio.currentTime = 0;
-      if (nodeSet && ctx) {
-        clearFadeTimeout(nodeSet);
-        nodeSet.gain.gain.cancelScheduledValues(ctx.currentTime);
-        nodeSet.gain.gain.setValueAtTime(1, ctx.currentTime);
-      }
-      audio.volume = 1;
-      return;
+    if (nodeSet && ctx) {
+      clearFadeTimeout(nodeSet);
+      nodeSet.gain.gain.cancelScheduledValues(ctx.currentTime);
+      nodeSet.gain.gain.setValueAtTime(1, ctx.currentTime);
     }
 
-    fadeAudioGain(audio, 0, AUDIO_FADE_MS, () => {
-      audio.pause();
-      if (resetTime) audio.currentTime = 0;
-
-      const latestCtx = getAudioContext();
-      const latestNodeSet = getAudioNodeSet(audio);
-      if (latestCtx && latestNodeSet) {
-        latestNodeSet.gain.gain.cancelScheduledValues(latestCtx.currentTime);
-        latestNodeSet.gain.gain.setValueAtTime(1, latestCtx.currentTime);
-      }
-
-      audio.volume = 1;
-    });
+    audio.pause();
+    if (resetTime) audio.currentTime = 0;
+    audio.volume = 1;
   }
 
   function resetAudioGain(audio) {
@@ -703,7 +688,7 @@ h1 {
 
     for(let i = 0, len = audios.length; i < len; i++){
       if(audios[i] !== e.target){
-        fadeOutAudio(audios[i], true);
+        stopAudioImmediately(audios[i], true);
       }
     }
   }, true);
@@ -1051,7 +1036,7 @@ h1 {
       if (audio.paused) {
         fadeInAudio(audio);
       } else {
-        fadeOutAudio(audio, false);
+        stopAudioImmediately(audio, false);
       }
     });
 
