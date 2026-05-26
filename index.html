@@ -544,68 +544,158 @@ h1 {
 <script>
   const AUDIO_FADE_MS = 1800;
 
-  function cancelAudioFade(audio) {
-    if (audio._fadeAnimationFrame) {
-      cancelAnimationFrame(audio._fadeAnimationFrame);
-      audio._fadeAnimationFrame = null;
+  let audioContext = null;
+  const audioNodes = new WeakMap();
+
+  function getAudioContext() {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return null;
+
+    if (!audioContext) {
+      audioContext = new AudioContextClass();
+    }
+
+    return audioContext;
+  }
+
+  function getAudioNodeSet(audio) {
+    const ctx = getAudioContext();
+    if (!ctx) return null;
+
+    if (audioNodes.has(audio)) {
+      return audioNodes.get(audio);
+    }
+
+    const source = ctx.createMediaElementSource(audio);
+    const gain = ctx.createGain();
+
+    gain.gain.value = 1;
+    source.connect(gain);
+    gain.connect(ctx.destination);
+
+    const nodeSet = { source, gain, timeoutId: null };
+    audioNodes.set(audio, nodeSet);
+
+    return nodeSet;
+  }
+
+  function clearFadeTimeout(nodeSet) {
+    if (nodeSet && nodeSet.timeoutId) {
+      clearTimeout(nodeSet.timeoutId);
+      nodeSet.timeoutId = null;
     }
   }
 
-  function fadeAudioVolume(audio, targetVolume, duration = AUDIO_FADE_MS, callback = null) {
-    cancelAudioFade(audio);
+  function fadeAudioGain(audio, targetGain, duration = AUDIO_FADE_MS, callback = null) {
+    const ctx = getAudioContext();
+    const nodeSet = getAudioNodeSet(audio);
 
-    const startVolume = Number.isFinite(audio.volume) ? audio.volume : 1;
-    const startTime = performance.now();
-
-    function step(now) {
-      const elapsed = now - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-
-      audio.volume = startVolume + (targetVolume - startVolume) * progress;
-
-      if (progress < 1) {
-        audio._fadeAnimationFrame = requestAnimationFrame(step);
-      } else {
-        audio.volume = targetVolume;
-        audio._fadeAnimationFrame = null;
-        if (callback) callback();
-      }
+    if (!ctx || !nodeSet) {
+      // Web Audio API が使えない場合の保険
+      audio.volume = targetGain;
+      if (callback) callback();
+      return;
     }
 
-    audio._fadeAnimationFrame = requestAnimationFrame(step);
+    clearFadeTimeout(nodeSet);
+
+    const now = ctx.currentTime;
+    const seconds = duration / 1000;
+    const gainParam = nodeSet.gain.gain;
+
+    if (typeof gainParam.cancelAndHoldAtTime === "function") {
+      gainParam.cancelAndHoldAtTime(now);
+    } else {
+      const currentGain = gainParam.value;
+      gainParam.cancelScheduledValues(now);
+      gainParam.setValueAtTime(currentGain, now);
+    }
+
+    gainParam.linearRampToValueAtTime(targetGain, now + seconds);
+
+    if (callback) {
+      nodeSet.timeoutId = setTimeout(() => {
+        nodeSet.timeoutId = null;
+        callback();
+      }, duration + 30);
+    }
   }
 
-  function fadeInAudio(audio) {
-    cancelAudioFade(audio);
-    audio.volume = 0;
+  async function fadeInAudio(audio) {
+    const ctx = getAudioContext();
+    const nodeSet = getAudioNodeSet(audio);
+
+    if (ctx && ctx.state === "suspended") {
+      await ctx.resume();
+    }
+
+    audio.volume = 1;
+
+    if (nodeSet) {
+      clearFadeTimeout(nodeSet);
+      nodeSet.gain.gain.cancelScheduledValues(ctx.currentTime);
+      nodeSet.gain.gain.setValueAtTime(0, ctx.currentTime);
+    } else {
+      audio.volume = 0;
+    }
 
     const playPromise = audio.play();
 
     if (playPromise && typeof playPromise.then === "function") {
       playPromise.then(() => {
-        fadeAudioVolume(audio, 1);
+        fadeAudioGain(audio, 1);
       }).catch(() => {
+        if (nodeSet && ctx) {
+          nodeSet.gain.gain.setValueAtTime(1, ctx.currentTime);
+        }
         audio.volume = 1;
       });
     } else {
-      fadeAudioVolume(audio, 1);
+      fadeAudioGain(audio, 1);
     }
   }
 
   function fadeOutAudio(audio, resetTime = false) {
-    cancelAudioFade(audio);
+    const ctx = getAudioContext();
+    const nodeSet = getAudioNodeSet(audio);
 
     if (audio.paused) {
       if (resetTime) audio.currentTime = 0;
+      if (nodeSet && ctx) {
+        clearFadeTimeout(nodeSet);
+        nodeSet.gain.gain.cancelScheduledValues(ctx.currentTime);
+        nodeSet.gain.gain.setValueAtTime(1, ctx.currentTime);
+      }
       audio.volume = 1;
       return;
     }
 
-    fadeAudioVolume(audio, 0, AUDIO_FADE_MS, () => {
+    fadeAudioGain(audio, 0, AUDIO_FADE_MS, () => {
       audio.pause();
       if (resetTime) audio.currentTime = 0;
+
+      const latestCtx = getAudioContext();
+      const latestNodeSet = getAudioNodeSet(audio);
+      if (latestCtx && latestNodeSet) {
+        latestNodeSet.gain.gain.cancelScheduledValues(latestCtx.currentTime);
+        latestNodeSet.gain.gain.setValueAtTime(1, latestCtx.currentTime);
+      }
+
       audio.volume = 1;
     });
+  }
+
+  function resetAudioGain(audio) {
+    const ctx = getAudioContext();
+    const nodeSet = getAudioNodeSet(audio);
+
+    if (ctx && nodeSet) {
+      clearFadeTimeout(nodeSet);
+      nodeSet.gain.gain.cancelScheduledValues(ctx.currentTime);
+      nodeSet.gain.gain.setValueAtTime(1, ctx.currentTime);
+    }
+
+    audio.volume = 1;
   }
 
   document.addEventListener('play', function(e){
@@ -971,8 +1061,7 @@ h1 {
     audio.addEventListener("pause", syncPlayerState);
 
     audio.addEventListener("ended", () => {
-      cancelAudioFade(audio);
-      audio.volume = 1;
+      resetAudioGain(audio);
       button.textContent = "▶";
       progress.value = "0";
     });
