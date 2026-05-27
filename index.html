@@ -545,7 +545,7 @@ h1 {
   // 再生開始時の「ブチッ」を避けるため、先頭をほんの少しだけ飛ばす
   // ただし、読み込み前に無理にシークすると一瞬止まりやすいので、
   // メタデータが読めている時だけスキップします。
-  const AUDIO_START_SKIP_SECONDS = 0.05;
+  const AUDIO_START_SKIP_SECONDS = 0.08;
 
   function prepareAudioForPlay(audio) {
     // preload=metadata でも、ブラウザによっては実際の読み込み開始が遅れることがあるため、
