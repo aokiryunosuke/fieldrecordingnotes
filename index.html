@@ -542,13 +542,8 @@ h1 {
 <body>
 
 <script>
-  // 再生開始時の「ブチッ」を避けるため、先頭をほんの少しだけ飛ばす
-  // 0.05秒なので、聴感上ほとんどわかりません。
-  const AUDIO_START_SKIP_SECONDS = 0.05;
-
   document.addEventListener('play', function(e){
     const audios = document.getElementsByTagName('audio');
-
     for(let i = 0, len = audios.length; i < len; i++){
       if(audios[i] !== e.target){
         audios[i].pause();
@@ -830,7 +825,7 @@ h1 {
     if (!persistentPopupAudios[src]) {
       const audio = document.createElement("audio");
       audio.src = src;
-      audio.preload = "metadata";
+      audio.preload = "none";
       audio.style.display = "none";
       audio.dataset.persistentPopupAudio = "true";
       document.body.appendChild(audio);
@@ -872,7 +867,7 @@ h1 {
 
     if (!options.persistent) {
       audio.src = src;
-      audio.preload = "metadata";
+      audio.preload = "none";
     }
 
     function updateTicks() {
@@ -898,12 +893,6 @@ h1 {
 
     button.addEventListener("click", () => {
       if (audio.paused) {
-        // 0秒ぴったりから鳴らすと、MP3先頭やデコードの都合で
-        // 「ブチッ」と鳴ることがあるため、最初だけ少し飛ばす。
-        if (audio.ended || audio.currentTime < AUDIO_START_SKIP_SECONDS) {
-          audio.currentTime = AUDIO_START_SKIP_SECONDS;
-        }
-
         audio.play();
       } else {
         audio.pause();
