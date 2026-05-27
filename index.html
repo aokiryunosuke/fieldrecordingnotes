@@ -859,9 +859,10 @@ h1 {
     if (!persistentPopupAudios[src]) {
       const audio = document.createElement("audio");
       audio.src = src;
-      audio.preload = "metadata";
+      audio.preload = "auto";
       audio.style.display = "none";
       audio.dataset.persistentPopupAudio = "true";
+      try { audio.load(); } catch (e) {}
       document.body.appendChild(audio);
       persistentPopupAudios[src] = audio;
     }
@@ -901,7 +902,8 @@ h1 {
 
     if (!options.persistent) {
       audio.src = src;
-      audio.preload = "metadata";
+      audio.preload = "auto";
+      try { audio.load(); } catch (e) {}
     }
 
     function updateTicks() {
@@ -928,6 +930,14 @@ h1 {
     // クリックより少し早い pointerdown/touchstart の段階で読み込みを始め、
     // 再生時の一瞬の引っかかりを減らす。
     button.addEventListener("pointerdown", () => {
+      prepareAudioForPlay(audio);
+    });
+
+    button.addEventListener("mouseenter", () => {
+      prepareAudioForPlay(audio);
+    });
+
+    button.addEventListener("focus", () => {
       prepareAudioForPlay(audio);
     });
 
