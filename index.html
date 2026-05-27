@@ -542,153 +542,17 @@ h1 {
 <body>
 
 <script>
-  const AUDIO_FADE_MS = 1800;
-
-  let audioContext = null;
-  const audioNodes = new WeakMap();
-
-  function getAudioContext() {
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContextClass) return null;
-
-    if (!audioContext) {
-      audioContext = new AudioContextClass();
-    }
-
-    return audioContext;
-  }
-
-  function getAudioNodeSet(audio) {
-    const ctx = getAudioContext();
-    if (!ctx) return null;
-
-    if (audioNodes.has(audio)) {
-      return audioNodes.get(audio);
-    }
-
-    const source = ctx.createMediaElementSource(audio);
-    const gain = ctx.createGain();
-
-    gain.gain.value = 1;
-    source.connect(gain);
-    gain.connect(ctx.destination);
-
-    const nodeSet = { source, gain, timeoutId: null };
-    audioNodes.set(audio, nodeSet);
-
-    return nodeSet;
-  }
-
-  function clearFadeTimeout(nodeSet) {
-    if (nodeSet && nodeSet.timeoutId) {
-      clearTimeout(nodeSet.timeoutId);
-      nodeSet.timeoutId = null;
-    }
-  }
-
-  function fadeAudioGain(audio, targetGain, duration = AUDIO_FADE_MS, callback = null) {
-    const ctx = getAudioContext();
-    const nodeSet = getAudioNodeSet(audio);
-
-    if (!ctx || !nodeSet) {
-      // Web Audio API が使えない場合の保険
-      audio.volume = targetGain;
-      if (callback) callback();
-      return;
-    }
-
-    clearFadeTimeout(nodeSet);
-
-    const now = ctx.currentTime;
-    const seconds = duration / 1000;
-    const gainParam = nodeSet.gain.gain;
-
-    if (typeof gainParam.cancelAndHoldAtTime === "function") {
-      gainParam.cancelAndHoldAtTime(now);
-    } else {
-      const currentGain = gainParam.value;
-      gainParam.cancelScheduledValues(now);
-      gainParam.setValueAtTime(currentGain, now);
-    }
-
-    gainParam.linearRampToValueAtTime(targetGain, now + seconds);
-
-    if (callback) {
-      nodeSet.timeoutId = setTimeout(() => {
-        nodeSet.timeoutId = null;
-        callback();
-      }, duration + 30);
-    }
-  }
-
-  async function fadeInAudio(audio) {
-    const ctx = getAudioContext();
-    const nodeSet = getAudioNodeSet(audio);
-
-    if (ctx && ctx.state === "suspended") {
-      await ctx.resume();
-    }
-
-    audio.volume = 1;
-
-    if (nodeSet) {
-      clearFadeTimeout(nodeSet);
-      nodeSet.gain.gain.cancelScheduledValues(ctx.currentTime);
-      nodeSet.gain.gain.setValueAtTime(0, ctx.currentTime);
-    } else {
-      audio.volume = 0;
-    }
-
-    const playPromise = audio.play();
-
-    if (playPromise && typeof playPromise.then === "function") {
-      playPromise.then(() => {
-        fadeAudioGain(audio, 1);
-      }).catch(() => {
-        if (nodeSet && ctx) {
-          nodeSet.gain.gain.setValueAtTime(1, ctx.currentTime);
-        }
-        audio.volume = 1;
-      });
-    } else {
-      fadeAudioGain(audio, 1);
-    }
-  }
-
-  function stopAudioImmediately(audio, resetTime = false) {
-    const ctx = getAudioContext();
-    const nodeSet = getAudioNodeSet(audio);
-
-    if (nodeSet && ctx) {
-      clearFadeTimeout(nodeSet);
-      nodeSet.gain.gain.cancelScheduledValues(ctx.currentTime);
-      nodeSet.gain.gain.setValueAtTime(1, ctx.currentTime);
-    }
-
-    audio.pause();
-    if (resetTime) audio.currentTime = 0;
-    audio.volume = 1;
-  }
-
-  function resetAudioGain(audio) {
-    const ctx = getAudioContext();
-    const nodeSet = getAudioNodeSet(audio);
-
-    if (ctx && nodeSet) {
-      clearFadeTimeout(nodeSet);
-      nodeSet.gain.gain.cancelScheduledValues(ctx.currentTime);
-      nodeSet.gain.gain.setValueAtTime(1, ctx.currentTime);
-    }
-
-    audio.volume = 1;
-  }
+  // 再生開始時の「ブチッ」を避けるため、先頭をほんの少しだけ飛ばす
+  // 0.05秒なので、聴感上ほとんどわかりません。
+  const AUDIO_START_SKIP_SECONDS = 0.05;
 
   document.addEventListener('play', function(e){
     const audios = document.getElementsByTagName('audio');
 
     for(let i = 0, len = audios.length; i < len; i++){
       if(audios[i] !== e.target){
-        stopAudioImmediately(audios[i], true);
+        audios[i].pause();
+        audios[i].currentTime = 0;
       }
     }
   }, true);
@@ -966,7 +830,7 @@ h1 {
     if (!persistentPopupAudios[src]) {
       const audio = document.createElement("audio");
       audio.src = src;
-      audio.preload = "none";
+      audio.preload = "metadata";
       audio.style.display = "none";
       audio.dataset.persistentPopupAudio = "true";
       document.body.appendChild(audio);
@@ -1008,7 +872,7 @@ h1 {
 
     if (!options.persistent) {
       audio.src = src;
-      audio.preload = "none";
+      audio.preload = "metadata";
     }
 
     function updateTicks() {
@@ -1034,9 +898,15 @@ h1 {
 
     button.addEventListener("click", () => {
       if (audio.paused) {
-        fadeInAudio(audio);
+        // 0秒ぴったりから鳴らすと、MP3先頭やデコードの都合で
+        // 「ブチッ」と鳴ることがあるため、最初だけ少し飛ばす。
+        if (audio.ended || audio.currentTime < AUDIO_START_SKIP_SECONDS) {
+          audio.currentTime = AUDIO_START_SKIP_SECONDS;
+        }
+
+        audio.play();
       } else {
-        stopAudioImmediately(audio, false);
+        audio.pause();
       }
     });
 
@@ -1046,7 +916,6 @@ h1 {
     audio.addEventListener("pause", syncPlayerState);
 
     audio.addEventListener("ended", () => {
-      resetAudioGain(audio);
       button.textContent = "▶";
       progress.value = "0";
     });
