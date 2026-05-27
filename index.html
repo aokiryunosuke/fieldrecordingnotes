@@ -542,8 +542,42 @@ h1 {
 <body>
 
 <script>
+  // 再生開始時の「ブチッ」を避けるため、先頭をほんの少しだけ飛ばす
+  // ただし、読み込み前に無理にシークすると一瞬止まりやすいので、
+  // メタデータが読めている時だけスキップします。
+  const AUDIO_START_SKIP_SECONDS = 0.05;
+
+  function prepareAudioForPlay(audio) {
+    // preload=metadata でも、ブラウザによっては実際の読み込み開始が遅れることがあるため、
+    // 再生ボタンを触った時点で軽く読み込みを始めます。
+    if (audio.readyState === 0) {
+      try {
+        audio.load();
+      } catch (e) {
+        // 読み込み開始に失敗しても、再生ボタン本体の処理に任せる
+      }
+    }
+  }
+
+  function skipTinyStartIfReady(audio) {
+    // HAVE_METADATA = 1 以上なら duration/currentTime を安全に扱いやすい。
+    // まだ読み込めていない時は、ここで待たずにそのまま再生します。
+    if (audio.readyState >= 1 && audio.currentTime < AUDIO_START_SKIP_SECONDS) {
+      try {
+        if (typeof audio.fastSeek === "function") {
+          audio.fastSeek(AUDIO_START_SKIP_SECONDS);
+        } else {
+          audio.currentTime = AUDIO_START_SKIP_SECONDS;
+        }
+      } catch (e) {
+        // シークできない場合は無理に止めず、そのまま再生する
+      }
+    }
+  }
+
   document.addEventListener('play', function(e){
     const audios = document.getElementsByTagName('audio');
+
     for(let i = 0, len = audios.length; i < len; i++){
       if(audios[i] !== e.target){
         audios[i].pause();
@@ -825,7 +859,7 @@ h1 {
     if (!persistentPopupAudios[src]) {
       const audio = document.createElement("audio");
       audio.src = src;
-      audio.preload = "none";
+      audio.preload = "metadata";
       audio.style.display = "none";
       audio.dataset.persistentPopupAudio = "true";
       document.body.appendChild(audio);
@@ -867,7 +901,7 @@ h1 {
 
     if (!options.persistent) {
       audio.src = src;
-      audio.preload = "none";
+      audio.preload = "metadata";
     }
 
     function updateTicks() {
@@ -891,8 +925,16 @@ h1 {
       }
     }
 
+    // クリックより少し早い pointerdown/touchstart の段階で読み込みを始め、
+    // 再生時の一瞬の引っかかりを減らす。
+    button.addEventListener("pointerdown", () => {
+      prepareAudioForPlay(audio);
+    });
+
     button.addEventListener("click", () => {
       if (audio.paused) {
+        prepareAudioForPlay(audio);
+        skipTinyStartIfReady(audio);
         audio.play();
       } else {
         audio.pause();
