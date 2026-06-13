@@ -600,17 +600,44 @@ h1 {
 }
 
 .loading-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
   background: rgba(255, 255, 255, 0.7);
   border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 10px;
-  padding: 14px 18px;
+  padding: 16px 20px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.loading-rainbow-spinner {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: conic-gradient(#ff6b6b, #ffd93d, #6bff95, #6bcfff, #b76bff, #ff6bcb, #ff6b6b);
+  animation: loading-rainbow-spin 0.9s linear infinite;
+  position: relative;
+}
+
+.loading-rainbow-spinner::after {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+@keyframes loading-rainbow-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 </style>
 </head>
 <body>
-<div id="loadingOverlay"><div class="loading-box">音声を準備しています...</div></div>
+<div id="loadingOverlay"><div class="loading-box"><div class="loading-rainbow-spinner" aria-hidden="true"></div><div>音声を準備しています...</div></div></div>
 
 <script>
   // 再生開始時の「ブチッ」を避けるため、先頭をほんの少しだけ飛ばす
@@ -1386,6 +1413,9 @@ h1 {
     let optimisticBaseTime = 0;
     let lastEarlyPlayMs = 0;
     let ignoreNextClick = false;
+    let pendingPlayRequest = false;
+    let playRetryTimer = null;
+    let playAttemptId = 0;
 
 
     function setButtonState(state) {
@@ -1488,49 +1518,102 @@ h1 {
     }
 
     function showPausedState() {
+      pendingPlayRequest = false;
       isTryingToPlay = false;
       optimisticStartMs = 0;
+      if (playRetryTimer) {
+        clearTimeout(playRetryTimer);
+        playRetryTimer = null;
+      }
       setButtonState("play");
       updateProgress();
       stopVisualProgress();
     }
 
-    function startPlayback() {
-      if (!audio.paused || isTryingToPlay) return;
+    function schedulePlayRetry(delay = 180) {
+      if (!pendingPlayRequest || !audio.paused) return;
+      if (playRetryTimer) clearTimeout(playRetryTimer);
+      playRetryTimer = setTimeout(() => {
+        playRetryTimer = null;
+        if (pendingPlayRequest && audio.paused) {
+          tryPlayNow(true);
+        }
+      }, delay);
+    }
 
+    function tryPlayNow(isRetry = false) {
       ensureAudioSrc(audio);
       markAudioRecentlyUsed(audio);
       prepareAudioForPlay(audio);
-      skipTinyStartIfReady(audio);
+
+      // 読み込みだけで止まった時も、ユーザーの再生意思を保持する。
+      pendingPlayRequest = true;
+      isTryingToPlay = true;
 
       if (isAudioReadyToStart()) {
         showPlayingStateImmediately();
       } else {
-        isTryingToPlay = true;
         optimisticBaseTime = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
         optimisticStartMs = performance.now();
         setButtonState("loading");
         updateTicks();
         updateProgress();
+        startVisualProgress();
       }
 
-      const playPromise = audio.play();
+      skipTinyStartIfReady(audio);
+
+      const thisAttempt = ++playAttemptId;
+      let playPromise;
+      try {
+        playPromise = audio.play();
+      } catch (e) {
+        schedulePlayRetry(isRetry ? 350 : 180);
+        return;
+      }
 
       if (playPromise && typeof playPromise.then === "function") {
         playPromise.then(() => {
+          if (thisAttempt !== playAttemptId) return;
           audio.dataset.keepPrepared = "true";
           markAudioRecentlyUsed(audio);
+
+          // iOSでplay()が解決しても一瞬pausedのままになることがあるため保険をかける。
+          setTimeout(() => {
+            if (pendingPlayRequest && audio.paused) {
+              schedulePlayRetry(80);
+            }
+          }, 120);
+
           // 実再生に入ったあとも、最初のcurrentTime反映遅れを少し吸収する。
           setTimeout(() => {
-            isTryingToPlay = false;
-            optimisticStartMs = 0;
+            if (!audio.paused) {
+              isTryingToPlay = false;
+              optimisticStartMs = 0;
+            }
           }, 700);
           startVisualProgress();
         }).catch(() => {
-          audio.dataset.keepPrepared = "false";
-          showPausedState();
+          if (thisAttempt !== playAttemptId) return;
+
+          // スマホでは、まだ読み込み中のaudio.play()が一度失敗することがある。
+          // その場合は停止表示に戻さず、canplay/loadeddata後に再試行する。
+          if (pendingPlayRequest) {
+            setButtonState("loading");
+            schedulePlayRetry(isRetry ? 450 : 220);
+          } else {
+            audio.dataset.keepPrepared = "false";
+            showPausedState();
+          }
         });
+      } else {
+        schedulePlayRetry(300);
       }
+    }
+
+    function startPlayback() {
+      if (!audio.paused && !isTryingToPlay) return;
+      tryPlayNow(false);
     }
 
     // スマホでは click まで待つとUI反応が遅れることがあるため、
@@ -1573,6 +1656,8 @@ h1 {
       if (audio.paused) {
         startPlayback();
       } else {
+        pendingPlayRequest = false;
+        isTryingToPlay = false;
         audio.pause();
       }
     });
@@ -1599,12 +1684,22 @@ h1 {
     audio.addEventListener("pause", () => {
       audio.dataset.keepPrepared = "false";
       markAudioRecentlyUsed(audio);
+
+      // 再生開始直後の一瞬のpauseは、スマホでロード待ち中に起きることがある。
+      // ユーザーが再生を押した直後なら、停止表示に戻さず再試行する。
+      if (!audio.ended && pendingPlayRequest && isTryingToPlay) {
+        setButtonState("loading");
+        schedulePlayRetry(180);
+        return;
+      }
+
       if (!audio.ended) {
         showPausedState();
       }
     });
 
     audio.addEventListener("ended", () => {
+      pendingPlayRequest = false;
       isTryingToPlay = false;
       optimisticStartMs = 0;
       setButtonState("play");
@@ -1628,13 +1723,24 @@ h1 {
     });
 
     audio.addEventListener("canplay", () => {
+      if (pendingPlayRequest && audio.paused) {
+        tryPlayNow(true);
+        return;
+      }
       if (isTryingToPlay || !audio.paused) {
         setButtonState("pause");
         startVisualProgress();
       }
     });
 
+    audio.addEventListener("loadeddata", () => {
+      if (pendingPlayRequest && audio.paused) {
+        tryPlayNow(true);
+      }
+    });
+
     audio.addEventListener("playing", () => {
+      pendingPlayRequest = false;
       setButtonState("pause");
       isTryingToPlay = false;
       optimisticStartMs = 0;
