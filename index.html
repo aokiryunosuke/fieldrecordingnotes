@@ -1129,7 +1129,7 @@ h1 {
     if (!persistentPopupAudios[src]) {
       const audio = document.createElement("audio");
       audio.src = src;
-      audio.preload = "none";
+      audio.preload = "metadata";
       audio.style.display = "none";
       audio.dataset.persistentPopupAudio = "true";
       document.body.appendChild(audio);
@@ -1174,6 +1174,26 @@ h1 {
       audio.preload = "metadata";
     }
 
+    let progressAnimationId = null;
+
+    function stopProgressAnimation() {
+      if (progressAnimationId !== null) {
+        cancelAnimationFrame(progressAnimationId);
+        progressAnimationId = null;
+      }
+    }
+
+    function startProgressAnimation() {
+      stopProgressAnimation();
+      const animate = () => {
+        updateProgress();
+        if (!audio.paused && !audio.ended) {
+          progressAnimationId = requestAnimationFrame(animate);
+        }
+      };
+      progressAnimationId = requestAnimationFrame(animate);
+    }
+
     function updateTicks() {
       if (audio.duration && audio.duration > 5) {
         const tickStep = (5 / audio.duration) * 100;
@@ -1184,10 +1204,7 @@ h1 {
       }
     }
 
-    function syncPlayerState() {
-      button.textContent = audio.paused ? "▶" : "Ⅱ";
-      button.setAttribute("aria-label", audio.paused ? "再生" : "一時停止");
-      updateTicks();
+    function updateProgress() {
       if (audio.duration) {
         progress.value = String((audio.currentTime / audio.duration) * 100);
       } else {
@@ -1195,11 +1212,35 @@ h1 {
       }
     }
 
+    function syncPlayerState() {
+      button.textContent = audio.paused ? "▶" : "Ⅱ";
+      button.setAttribute("aria-label", audio.paused ? "再生" : "一時停止");
+      updateTicks();
+      updateProgress();
+    }
+
+    function showLoadingState() {
+      button.textContent = "…";
+      button.setAttribute("aria-label", "読み込み中");
+    }
+
+    function showPlayingStateImmediately() {
+      button.textContent = "Ⅱ";
+      button.setAttribute("aria-label", "一時停止");
+      updateTicks();
+      updateProgress();
+      startProgressAnimation();
+    }
+
     // クリックより少し早い pointerdown/touchstart の段階で読み込みを始め、
     // 再生時の一瞬の引っかかりを減らす。
     button.addEventListener("pointerdown", () => {
       prepareAudioForPlay(audio);
     });
+
+    button.addEventListener("touchstart", () => {
+      prepareAudioForPlay(audio);
+    }, { passive: true });
 
     button.addEventListener("mouseenter", () => {
       prepareAudioForPlay(audio);
@@ -1211,9 +1252,20 @@ h1 {
 
     button.addEventListener("click", () => {
       if (audio.paused) {
+        showLoadingState();
         prepareAudioForPlay(audio);
         skipTinyStartIfReady(audio);
-        audio.play();
+
+        const playPromise = audio.play();
+        showPlayingStateImmediately();
+
+        if (playPromise && typeof playPromise.catch === "function") {
+          playPromise.catch(() => {
+            stopProgressAnimation();
+            button.textContent = "▶";
+            button.setAttribute("aria-label", "再生");
+          });
+        }
       } else {
         audio.pause();
       }
@@ -1221,19 +1273,22 @@ h1 {
 
     audio.addEventListener("loadedmetadata", updateTicks);
     audio.addEventListener("durationchange", updateTicks);
-    audio.addEventListener("play", syncPlayerState);
-    audio.addEventListener("pause", syncPlayerState);
+    audio.addEventListener("play", () => {
+      syncPlayerState();
+      startProgressAnimation();
+    });
+    audio.addEventListener("pause", () => {
+      syncPlayerState();
+      stopProgressAnimation();
+    });
 
     audio.addEventListener("ended", () => {
+      stopProgressAnimation();
       button.textContent = "▶";
       progress.value = "0";
     });
 
-    audio.addEventListener("timeupdate", () => {
-      if (audio.duration) {
-        progress.value = String((audio.currentTime / audio.duration) * 100);
-      }
-    });
+    audio.addEventListener("timeupdate", updateProgress);
 
     progress.addEventListener("input", () => {
       if (audio.duration) {
