@@ -543,9 +543,37 @@ h1 {
     left: 20px;
   }
 }
+
+
+#loadingOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e0e0d1;
+  color: #333;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+}
+
+#loadingOverlay.hidden {
+  display: none;
+}
+
+.loading-box {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 10px;
+  padding: 14px 18px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
 </style>
 </head>
 <body>
+<div id="loadingOverlay"><div class="loading-box">音声を準備しています...</div></div>
 
 <script>
   // 再生開始時の「ブチッ」を避けるため、先頭をほんの少しだけ飛ばす
@@ -554,9 +582,9 @@ h1 {
   const AUDIO_START_SKIP_SECONDS = 0.08;
 
   function prepareAudioForPlay(audio) {
-    // preload=metadata でも、ブラウザによっては実際の読み込み開始が遅れることがあるため、
-    // 再生ボタンを触った時点で軽く読み込みを始めます。
-    if (audio.readyState === 0) {
+    // preload=none の音声も、ユーザーが触れた時点で metadata 読み込みに切り替えます。
+    if (audio && audio.readyState === 0) {
+      audio.preload = "metadata";
       try {
         audio.load();
       } catch (e) {
@@ -1124,12 +1152,85 @@ h1 {
   }
 
   const persistentPopupAudios = {};
+  const INITIAL_AUDIO_PRELOAD_COUNT = 6;
+
+  function warmAudioMetadata(audio) {
+    if (!audio || audio.dataset.prepared === "true") return Promise.resolve();
+    audio.dataset.prepared = "true";
+    audio.preload = "metadata";
+
+    return new Promise((resolve) => {
+      let settled = false;
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        audio.removeEventListener("loadedmetadata", finish);
+        audio.removeEventListener("canplay", finish);
+        audio.removeEventListener("error", finish);
+        resolve();
+      };
+
+      audio.addEventListener("loadedmetadata", finish, { once: true });
+      audio.addEventListener("canplay", finish, { once: true });
+      audio.addEventListener("error", finish, { once: true });
+
+      try {
+        audio.load();
+      } catch (e) {
+        finish();
+      }
+
+      setTimeout(finish, 1800);
+    });
+  }
+
+  function hideLoadingOverlay() {
+    const loadingOverlay = document.getElementById("loadingOverlay");
+    if (loadingOverlay) loadingOverlay.classList.add("hidden");
+  }
+
+  function startInitialAudioLoading() {
+    const firstAudios = renderedItems
+      .slice(0, INITIAL_AUDIO_PRELOAD_COUNT)
+      .map(item => item.audio)
+      .filter(Boolean);
+
+    const preloadJobs = firstAudios.map(audio => warmAudioMetadata(audio));
+
+    Promise.race([
+      Promise.all(preloadJobs),
+      new Promise(resolve => setTimeout(resolve, 2200))
+    ]).then(hideLoadingOverlay);
+  }
+
+  function setupAudioLazyLoading() {
+    if (!("IntersectionObserver" in window)) {
+      renderedItems.forEach(item => warmAudioMetadata(item.audio));
+      return;
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const matched = renderedItems.find(item => item.el === entry.target);
+        if (matched && matched.audio) warmAudioMetadata(matched.audio);
+        observer.unobserve(entry.target);
+      });
+    }, {
+      root: null,
+      rootMargin: "900px 0px",
+      threshold: 0
+    });
+
+    renderedItems.forEach(item => observer.observe(item.el));
+  }
+
 
   function getPersistentPopupAudio(src) {
     if (!persistentPopupAudios[src]) {
       const audio = document.createElement("audio");
       audio.src = src;
-      audio.preload = "metadata";
+      audio.preload = "none";
       audio.style.display = "none";
       audio.dataset.persistentPopupAudio = "true";
       document.body.appendChild(audio);
@@ -1158,9 +1259,9 @@ h1 {
     progress.className = "custom-audio-progress";
     progress.type = "range";
     progress.min = "0";
-    progress.max = "100";
+    progress.max = "1000";
     progress.value = "0";
-    progress.step = "0.1";
+    progress.step = "1";
     progress.setAttribute("aria-label", "再生位置");
 
     // ポップアップ内の音声だけは、閉じても止まらないように
@@ -1171,43 +1272,39 @@ h1 {
 
     if (!options.persistent) {
       audio.src = src;
-      audio.preload = "metadata";
+      audio.preload = "none";
     }
 
-    let progressAnimationId = null;
-    let optimisticProgress = false;
-    let optimisticStartTime = 0;
-    let optimisticStartCurrentTime = 0;
+    let rafId = null;
+    let isTryingToPlay = false;
+    let optimisticStartMs = 0;
+    let optimisticBaseTime = 0;
+    let lastEarlyPlayMs = 0;
 
-    function stopProgressAnimation() {
-      if (progressAnimationId !== null) {
-        cancelAnimationFrame(progressAnimationId);
-        progressAnimationId = null;
+    function getUsableDuration() {
+      if (Number.isFinite(audio.duration) && audio.duration > 0) {
+        return audio.duration;
       }
-      optimisticProgress = false;
+      // スマホでは再生直後に duration が一瞬取れないことがある。
+      // その間も丸が止まって見えないよう、仮の長さで少しだけ動かす。
+      return 60;
     }
 
-    function startProgressAnimation(useOptimisticProgress = false) {
-      stopProgressAnimation();
+    function getVisualCurrentTime() {
+      const actual = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
 
-      optimisticProgress = useOptimisticProgress;
-      optimisticStartTime = performance.now();
-      optimisticStartCurrentTime = audio.currentTime || 0;
+      // 再生直後、スマホでは currentTime の反映が遅れることがある。
+      // その間だけ、押した瞬間からの経過時間で見た目の丸を動かす。
+      if (isTryingToPlay && optimisticStartMs) {
+        const elapsed = (performance.now() - optimisticStartMs) / 1000;
+        return Math.max(actual, optimisticBaseTime + elapsed);
+      }
 
-      const animate = () => {
-        updateProgress();
-
-        // audio.paused が true のままでも、再生開始待ちの間は丸を動かす。
-        if ((!audio.paused && !audio.ended) || optimisticProgress) {
-          progressAnimationId = requestAnimationFrame(animate);
-        }
-      };
-
-      progressAnimationId = requestAnimationFrame(animate);
+      return actual;
     }
 
     function updateTicks() {
-      if (audio.duration && audio.duration > 5) {
+      if (Number.isFinite(audio.duration) && audio.duration > 5) {
         const tickStep = (5 / audio.duration) * 100;
         ticks.style.setProperty("--tick-step", `${tickStep}%`);
         ticks.style.display = "";
@@ -1217,55 +1314,100 @@ h1 {
     }
 
     function updateProgress() {
-      if (audio.duration) {
-        // スマホでは再生開始直後に currentTime の更新が遅れることがあるため、
-        // 最初だけ画面側で進みを補完する。
-        if (optimisticProgress && audio.currentTime <= optimisticStartCurrentTime + 0.02) {
-          const elapsed = (performance.now() - optimisticStartTime) / 1000;
-          const estimatedTime = optimisticStartCurrentTime + elapsed;
-          progress.value = String(Math.min((estimatedTime / audio.duration) * 100, 100));
-        } else {
-          optimisticProgress = false;
-          progress.value = String((audio.currentTime / audio.duration) * 100);
-        }
-      } else if (optimisticProgress) {
-        // duration がまだ取れていない場合も、止まって見えないように少しだけ動かす。
-        const elapsed = (performance.now() - optimisticStartTime) / 1000;
-        progress.value = String(Math.min((elapsed / 30) * 100, 8));
-      } else {
-        progress.value = "0";
-      }
+      const duration = getUsableDuration();
+      const current = Math.min(getVisualCurrentTime(), duration);
+      const value = String(Math.max(0, Math.min(1000, (current / duration) * 1000)));
+      progress.value = value;
+      // iOS Safariでrangeの表示更新が遅れることがあるため、属性側も更新する。
+      progress.setAttribute("value", value);
     }
 
-    function syncPlayerState() {
-      button.textContent = audio.paused ? "▶" : "Ⅱ";
-      button.setAttribute("aria-label", audio.paused ? "再生" : "一時停止");
-      updateTicks();
-      updateProgress();
+    function startVisualProgress() {
+      if (rafId !== null) return;
+
+      const tick = () => {
+        updateProgress();
+        if (isTryingToPlay || !audio.paused) {
+          rafId = requestAnimationFrame(tick);
+        } else {
+          rafId = null;
+        }
+      };
+
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function stopVisualProgress() {
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
     }
 
     function showPlayingStateImmediately() {
       button.textContent = "Ⅱ";
       button.setAttribute("aria-label", "一時停止");
+
+      if (!isTryingToPlay) {
+        isTryingToPlay = true;
+        optimisticBaseTime = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
+        optimisticStartMs = performance.now();
+      }
+
       updateTicks();
-      startProgressAnimation(true);
+      updateProgress();
+      startVisualProgress();
     }
 
-    function resetToPlayButton() {
-      stopProgressAnimation();
+    function showPausedState() {
+      isTryingToPlay = false;
+      optimisticStartMs = 0;
       button.textContent = "▶";
       button.setAttribute("aria-label", "再生");
       updateProgress();
+      stopVisualProgress();
     }
 
-    // pointerdown の時点でUIを先に動かす。
-    // click/play イベントを待つと、スマホでは表示だけ数秒遅れることがある。
-    button.addEventListener("pointerdown", () => {
-      if (audio.paused) {
-        showPlayingStateImmediately();
-        prepareAudioForPlay(audio);
+    function startPlayback() {
+      if (!audio.paused || isTryingToPlay) return;
+
+      prepareAudioForPlay(audio);
+      skipTinyStartIfReady(audio);
+      showPlayingStateImmediately();
+
+      const playPromise = audio.play();
+
+      if (playPromise && typeof playPromise.then === "function") {
+        playPromise.then(() => {
+          // 実再生に入ったあとも、最初のcurrentTime反映遅れを少し吸収する。
+          setTimeout(() => {
+            isTryingToPlay = false;
+            optimisticStartMs = 0;
+          }, 700);
+          startVisualProgress();
+        }).catch(() => {
+          showPausedState();
+        });
+      }
+    }
+
+    // スマホでは click まで待つとUI反応が遅れることがあるため、
+    // タッチの場合は pointerdown/touchstart の時点で再生と表示更新を始める。
+    button.addEventListener("pointerdown", (e) => {
+      prepareAudioForPlay(audio);
+      if (e.pointerType === "touch" || e.pointerType === "pen") {
+        lastEarlyPlayMs = Date.now();
+        startPlayback();
       }
     });
+
+    button.addEventListener("touchstart", () => {
+      // pointerdown が来ない環境向けの保険。
+      if (Date.now() - lastEarlyPlayMs > 500) {
+        lastEarlyPlayMs = Date.now();
+        startPlayback();
+      }
+    }, { passive: true });
 
     button.addEventListener("mouseenter", () => {
       prepareAudioForPlay(audio);
@@ -1276,18 +1418,12 @@ h1 {
     });
 
     button.addEventListener("click", () => {
+      // タッチ時は pointerdown/touchstart ですでに再生を始めているので、
+      // 直後の click で誤って一時停止しないようにする。
+      if (Date.now() - lastEarlyPlayMs < 700) return;
+
       if (audio.paused) {
-        showPlayingStateImmediately();
-        prepareAudioForPlay(audio);
-        skipTinyStartIfReady(audio);
-
-        const playPromise = audio.play();
-
-        if (playPromise && typeof playPromise.catch === "function") {
-          playPromise.catch(() => {
-            resetToPlayButton();
-          });
-        }
+        startPlayback();
       } else {
         audio.pause();
       }
@@ -1306,39 +1442,39 @@ h1 {
     audio.addEventListener("play", () => {
       button.textContent = "Ⅱ";
       button.setAttribute("aria-label", "一時停止");
-      updateTicks();
-      startProgressAnimation(true);
-    });
-
-    audio.addEventListener("playing", () => {
-      optimisticProgress = false;
-      button.textContent = "Ⅱ";
-      button.setAttribute("aria-label", "一時停止");
-      startProgressAnimation(false);
+      startVisualProgress();
     });
 
     audio.addEventListener("pause", () => {
-      syncPlayerState();
-      stopProgressAnimation();
+      if (!audio.ended) {
+        showPausedState();
+      }
     });
 
     audio.addEventListener("ended", () => {
-      stopProgressAnimation();
+      isTryingToPlay = false;
+      optimisticStartMs = 0;
       button.textContent = "▶";
       button.setAttribute("aria-label", "再生");
       progress.value = "0";
+      progress.setAttribute("value", "0");
+      stopVisualProgress();
     });
 
     audio.addEventListener("timeupdate", updateProgress);
 
     progress.addEventListener("input", () => {
-      if (audio.duration) {
-        audio.currentTime = (Number(progress.value) / 100) * audio.duration;
+      const duration = getUsableDuration();
+      if (duration) {
+        audio.currentTime = (Number(progress.value) / 1000) * duration;
+        optimisticBaseTime = audio.currentTime;
+        optimisticStartMs = performance.now();
         updateProgress();
       }
     });
 
-    syncPlayerState();
+    updateTicks();
+    updateProgress();
     progressWrap.appendChild(ticks);
     progressWrap.appendChild(progress);
     player.appendChild(button);
@@ -1347,6 +1483,9 @@ h1 {
     if (!options.persistent) {
       player.appendChild(audio);
     }
+
+    player.audioElement = audio;
+    player.prepareAudio = () => warmAudioMetadata(audio);
 
     return player;
   }
@@ -1404,7 +1543,7 @@ h1 {
       mapJumpButton.onclick = () => goToMapFromList(file, index);
       wrapper.appendChild(mapJumpButton);
 
-      const audio = createCustomAudioPlayer(file.name);
+      const audio = createCustomAudioPlayer(file.name, { preload: "none" });
 
       const comment = document.createElement("div");
       comment.className = "comment";
@@ -1422,6 +1561,7 @@ h1 {
       renderedItems.push({
         el: item,
         index: index,
+        audio: audio.audioElement,
         searchText: (file.title + " " + file.comment).toLowerCase()
       });
     });
@@ -1522,6 +1662,56 @@ h1 {
     }
   });
 
+
+  function createMapPopupContent(file, index, id) {
+    const popupContent = document.createElement("div");
+    popupContent.className = "map-popup-content";
+
+    const title = document.createElement("strong");
+    title.className = "map-popup-title";
+    title.textContent = file.title;
+    popupContent.appendChild(title);
+
+    const img = document.createElement("img");
+    img.src = file.images[0];
+    img.className = "map-popup-image";
+
+    // ★軽量化：遅延読み込み
+    img.loading = "lazy";
+    img.decoding = "async";
+
+    img.onclick = () => showModalWithImage(img.src);
+
+    popupContent.appendChild(img);
+
+    const audio = createCustomAudioPlayer(file.name, { persistent: true });
+    audio.prepareAudio();
+
+    popupContent.appendChild(audio);
+
+    const button = document.createElement("button");
+    button.textContent = "詳細へ移動";
+    button.className = "map-popup-detail-button";
+    button.onclick = () => {
+      const target = document.getElementById(id);
+
+      if (isFullscreen) {
+        document.getElementById('map').classList.remove('fullscreen-map');
+        document.getElementById('fullscreenMapButton').textContent = '拡大';
+        isFullscreen = false;
+        map.invalidateSize();
+        if (openedPopup) openedPopup.openPopup();
+
+        setTimeout(() => scrollItemToCenter(target), 120);
+      } else {
+        scrollItemToCenter(target);
+      }
+    };
+    popupContent.appendChild(button);
+
+    return popupContent;
+  }
+
   // === Map ===
   const map = L.map('map').setView([36.2, 138.2], 6);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -1533,51 +1723,7 @@ h1 {
       const id = `item-${index}`;
       const marker = L.marker([file.lat, file.lng]).addTo(map);
 
-      const popupContent = document.createElement("div");
-      popupContent.className = "map-popup-content";
-
-      const title = document.createElement("strong");
-      title.className = "map-popup-title";
-      title.textContent = file.title;
-      popupContent.appendChild(title);
-
-      const img = document.createElement("img");
-      img.src = file.images[0];
-      img.className = "map-popup-image";
-
-      // ★軽量化：遅延読み込み
-      img.loading = "lazy";
-      img.decoding = "async";
-
-      img.onclick = () => showModalWithImage(img.src);
-
-      popupContent.appendChild(img);
-
-      const audio = createCustomAudioPlayer(file.name, { persistent: true });
-
-      popupContent.appendChild(audio);
-
-      const button = document.createElement("button");
-      button.textContent = "詳細へ移動";
-      button.className = "map-popup-detail-button";
-      button.onclick = () => {
-        const target = document.getElementById(id);
-
-        if (isFullscreen) {
-          document.getElementById('map').classList.remove('fullscreen-map');
-          document.getElementById('fullscreenMapButton').textContent = '拡大';
-          isFullscreen = false;
-          map.invalidateSize();
-          if (openedPopup) openedPopup.openPopup();
-
-          setTimeout(() => scrollItemToCenter(target), 120);
-        } else {
-          scrollItemToCenter(target);
-        }
-      };
-      popupContent.appendChild(button);
-
-      marker.bindPopup(popupContent);
+      marker.bindPopup(() => createMapPopupContent(file, index, id));
       markers.push(marker);
     } else {
       markers.push(null);
@@ -1587,6 +1733,8 @@ h1 {
   // ★重要：リストは1回だけ作って、検索は表示切替のみ
   buildListOnce();
   filterList("");
+  startInitialAudioLoading();
+  setupAudioLazyLoading();
 
   // ★検索：検索窓自体は固定せず、入力時に検索窓が画面上部へ来るようにする
   let _searchTimer = null;
