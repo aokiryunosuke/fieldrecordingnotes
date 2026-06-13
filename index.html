@@ -1510,10 +1510,26 @@ h1 {
     function showPausedState() {
       pendingPlayRequest = false;
       isTryingToPlay = false;
+      playAttemptId++;
       if (playRetryTimer) {
         clearTimeout(playRetryTimer);
         playRetryTimer = null;
       }
+      setButtonState("play");
+      updateProgress();
+      stopVisualProgress();
+    }
+
+    function stopPlaybackByUser() {
+      pendingPlayRequest = false;
+      isTryingToPlay = false;
+      playAttemptId++;
+      if (playRetryTimer) {
+        clearTimeout(playRetryTimer);
+        playRetryTimer = null;
+      }
+      audio.dataset.keepPrepared = "false";
+      audio.pause();
       setButtonState("play");
       updateProgress();
       stopVisualProgress();
@@ -1609,7 +1625,11 @@ h1 {
       if (e.pointerType === "touch" || e.pointerType === "pen") {
         lastEarlyPlayMs = Date.now();
         ignoreNextClick = true;
-        startPlayback();
+        if (audio.paused || isTryingToPlay || pendingPlayRequest) {
+          startPlayback();
+        } else {
+          stopPlaybackByUser();
+        }
       }
     });
 
@@ -1618,7 +1638,11 @@ h1 {
       if (Date.now() - lastEarlyPlayMs > 500) {
         lastEarlyPlayMs = Date.now();
         ignoreNextClick = true;
-        startPlayback();
+        if (audio.paused || isTryingToPlay || pendingPlayRequest) {
+          startPlayback();
+        } else {
+          stopPlaybackByUser();
+        }
       }
     }, { passive: true });
 
@@ -1642,9 +1666,7 @@ h1 {
       if (audio.paused) {
         startPlayback();
       } else {
-        pendingPlayRequest = false;
-        isTryingToPlay = false;
-        audio.pause();
+        stopPlaybackByUser();
       }
     });
 
