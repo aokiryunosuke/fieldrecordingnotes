@@ -637,7 +637,7 @@ h1 {
 </style>
 </head>
 <body>
-<div id="loadingOverlay"><div class="loading-box"><div class="loading-rainbow-spinner" aria-hidden="true"></div><div>音声を準備しています...</div></div></div>
+<div id="loadingOverlay"><div class="loading-box"><div class="loading-rainbow-spinner" aria-hidden="true"></div></div></div>
 
 <script>
   // 再生開始時の「ブチッ」を避けるため、先頭をほんの少しだけ飛ばす
@@ -1409,8 +1409,6 @@ h1 {
 
     let rafId = null;
     let isTryingToPlay = false;
-    let optimisticStartMs = 0;
-    let optimisticBaseTime = 0;
     let lastEarlyPlayMs = 0;
     let ignoreNextClick = false;
     let pendingPlayRequest = false;
@@ -1444,22 +1442,11 @@ h1 {
       if (Number.isFinite(audio.duration) && audio.duration > 0) {
         return audio.duration;
       }
-      // スマホでは再生直後に duration が一瞬取れないことがある。
-      // その間も丸が止まって見えないよう、仮の長さで少しだけ動かす。
-      return 60;
+      return 0;
     }
 
-    function getVisualCurrentTime() {
-      const actual = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
-
-      // 再生直後、スマホでは currentTime の反映が遅れることがある。
-      // その間だけ、押した瞬間からの経過時間で見た目の丸を動かす。
-      if (isTryingToPlay && optimisticStartMs) {
-        const elapsed = (performance.now() - optimisticStartMs) / 1000;
-        return Math.max(actual, optimisticBaseTime + elapsed);
-      }
-
-      return actual;
+    function getRealCurrentTime() {
+      return Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
     }
 
     function updateTicks() {
@@ -1474,8 +1461,13 @@ h1 {
 
     function updateProgress() {
       const duration = getUsableDuration();
-      const current = Math.min(getVisualCurrentTime(), duration);
-      const value = String(Math.max(0, Math.min(1000, (current / duration) * 1000)));
+      let value = "0";
+
+      if (duration > 0) {
+        const current = Math.min(getRealCurrentTime(), duration);
+        value = String(Math.max(0, Math.min(1000, (current / duration) * 1000)));
+      }
+
       progress.value = value;
       // iOS Safariでrangeの表示更新が遅れることがあるため、属性側も更新する。
       progress.setAttribute("value", value);
@@ -1508,8 +1500,6 @@ h1 {
 
       if (!isTryingToPlay) {
         isTryingToPlay = true;
-        optimisticBaseTime = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
-        optimisticStartMs = performance.now();
       }
 
       updateTicks();
@@ -1520,7 +1510,6 @@ h1 {
     function showPausedState() {
       pendingPlayRequest = false;
       isTryingToPlay = false;
-      optimisticStartMs = 0;
       if (playRetryTimer) {
         clearTimeout(playRetryTimer);
         playRetryTimer = null;
@@ -1553,8 +1542,6 @@ h1 {
       if (isAudioReadyToStart()) {
         showPlayingStateImmediately();
       } else {
-        optimisticBaseTime = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
-        optimisticStartMs = performance.now();
         setButtonState("loading");
         updateTicks();
         updateProgress();
@@ -1589,8 +1576,7 @@ h1 {
           setTimeout(() => {
             if (!audio.paused) {
               isTryingToPlay = false;
-              optimisticStartMs = 0;
-            }
+                    }
           }, 700);
           startVisualProgress();
         }).catch(() => {
@@ -1701,7 +1687,6 @@ h1 {
     audio.addEventListener("ended", () => {
       pendingPlayRequest = false;
       isTryingToPlay = false;
-      optimisticStartMs = 0;
       setButtonState("play");
       progress.value = "0";
       progress.setAttribute("value", "0");
@@ -1743,7 +1728,6 @@ h1 {
       pendingPlayRequest = false;
       setButtonState("pause");
       isTryingToPlay = false;
-      optimisticStartMs = 0;
       startVisualProgress();
     });
 
@@ -1753,9 +1737,7 @@ h1 {
       const duration = getUsableDuration();
       if (duration) {
         audio.currentTime = (Number(progress.value) / 1000) * duration;
-        optimisticBaseTime = audio.currentTime;
-        optimisticStartMs = performance.now();
-        updateProgress();
+          updateProgress();
       }
     });
 
