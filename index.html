@@ -1262,6 +1262,11 @@ h1 {
 
   const persistentPopupAudios = {};
   const INITIAL_AUDIO_PRELOAD_COUNT = 6;
+  const INITIAL_IMAGE_PRELOAD_COUNT = 8;
+  const INITIAL_AUDIO_METADATA_TIMEOUT_MS = 5200;
+  const INITIAL_IMAGE_LOAD_TIMEOUT_MS = 5200;
+  const INITIAL_LOADING_MIN_MS = 900;
+  const INITIAL_LOADING_MAX_WAIT_MS = 7200;
   const MAX_PREPARED_AUDIOS = 8;
   const preparedAudioPool = new Map();
 
@@ -1336,7 +1341,7 @@ h1 {
         finish();
       }
 
-      setTimeout(finish, 1800);
+      setTimeout(finish, INITIAL_AUDIO_METADATA_TIMEOUT_MS);
     });
   }
 
@@ -1345,18 +1350,82 @@ h1 {
     if (loadingOverlay) loadingOverlay.classList.add("hidden");
   }
 
+  function waitForDelay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  function waitForWindowLoad() {
+    if (document.readyState === "complete") return Promise.resolve();
+
+    return new Promise(resolve => {
+      window.addEventListener("load", resolve, { once: true });
+      setTimeout(resolve, INITIAL_LOADING_MAX_WAIT_MS);
+    });
+  }
+
+  function waitForImageLoad(img) {
+    return new Promise(resolve => {
+      if (!img) {
+        resolve();
+        return;
+      }
+
+      // 最初の数枚だけはロード画面中に読み込ませる
+      img.loading = "eager";
+
+      if (img.complete && img.naturalWidth > 0) {
+        resolve();
+        return;
+      }
+
+      let settled = false;
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        img.removeEventListener("load", finish);
+        img.removeEventListener("error", finish);
+        resolve();
+      };
+
+      img.addEventListener("load", finish, { once: true });
+      img.addEventListener("error", finish, { once: true });
+      setTimeout(finish, INITIAL_IMAGE_LOAD_TIMEOUT_MS);
+    });
+  }
+
+  function waitForInitialImages() {
+    const initialImages = renderedItems
+      .slice(0, INITIAL_IMAGE_PRELOAD_COUNT)
+      .flatMap(item => Array.from(item.el.querySelectorAll(".image-clickable-wrap img")));
+
+    return Promise.allSettled(initialImages.map(img => waitForImageLoad(img)));
+  }
+
   function startInitialAudioLoading() {
+    const startedAt = Date.now();
+
     const firstAudios = renderedItems
       .slice(0, INITIAL_AUDIO_PRELOAD_COUNT)
       .map(item => item.audio)
       .filter(Boolean);
 
-    const preloadJobs = firstAudios.map(audio => warmAudioMetadata(audio));
+    const initialAudioJob = Promise.allSettled(firstAudios.map(audio => warmAudioMetadata(audio)));
+    const initialImageJob = waitForInitialImages();
+    const windowLoadJob = waitForWindowLoad();
 
-    Promise.race([
-      Promise.all(preloadJobs),
-      new Promise(resolve => setTimeout(resolve, 2200))
-    ]).then(hideLoadingOverlay);
+    const requiredLoadingJob = Promise.allSettled([
+      initialAudioJob,
+      initialImageJob,
+      windowLoadJob
+    ]);
+
+    const maxWaitJob = waitForDelay(INITIAL_LOADING_MAX_WAIT_MS);
+
+    Promise.race([requiredLoadingJob, maxWaitJob]).then(() => {
+      const elapsed = Date.now() - startedAt;
+      const remaining = Math.max(0, INITIAL_LOADING_MIN_MS - elapsed);
+      setTimeout(hideLoadingOverlay, remaining);
+    });
   }
 
   function setupAudioLazyLoading() {
