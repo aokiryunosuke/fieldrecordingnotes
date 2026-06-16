@@ -109,6 +109,38 @@ h1 {
   border-radius: 0;
 }
 
+.image-clickable-wrap {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+  cursor: pointer;
+}
+
+.image-clickable-wrap img {
+  display: block;
+}
+
+.image-zoom-badge {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.26);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.95rem;
+  font-weight: 400;
+  line-height: 1;
+  pointer-events: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(1px);
+}
+
 .map-jump-button {
   align-self: center;
   padding: 2px 7px;
@@ -1815,8 +1847,19 @@ h1 {
         img.loading = "lazy";
         img.decoding = "async";
 
-        img.onclick = () => showModalWithImage(imgSrc);
-        wrapper.appendChild(img);
+        const imgWrap = document.createElement("div");
+        imgWrap.className = "image-clickable-wrap";
+        imgWrap.title = "クリックで拡大";
+        imgWrap.setAttribute("aria-label", "クリックで拡大");
+        imgWrap.onclick = () => showModalWithImage(imgSrc);
+
+        const zoomBadge = document.createElement("span");
+        zoomBadge.className = "image-zoom-badge";
+        zoomBadge.textContent = "+";
+
+        imgWrap.appendChild(img);
+        imgWrap.appendChild(zoomBadge);
+        wrapper.appendChild(imgWrap);
       });
 
       const mapJumpButton = document.createElement("button");
@@ -1962,9 +2005,20 @@ h1 {
     img.loading = "lazy";
     img.decoding = "async";
 
-    img.onclick = () => showModalWithImage(img.src);
+    const popupImgWrap = document.createElement("div");
+    popupImgWrap.className = "image-clickable-wrap";
+    popupImgWrap.title = "クリックで拡大";
+    popupImgWrap.setAttribute("aria-label", "クリックで拡大");
+    popupImgWrap.onclick = () => showModalWithImage(img.src);
 
-    popupContent.appendChild(img);
+    const popupZoomBadge = document.createElement("span");
+    popupZoomBadge.className = "image-zoom-badge";
+    popupZoomBadge.textContent = "+";
+
+    popupImgWrap.appendChild(img);
+    popupImgWrap.appendChild(popupZoomBadge);
+
+    popupContent.appendChild(popupImgWrap);
 
     const audio = createCustomAudioPlayer(file.name, { persistent: true });
     audio.prepareAudio();
