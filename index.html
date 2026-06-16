@@ -142,7 +142,22 @@ h1 {
 }
 
 .map-popup-content .image-zoom-badge {
-  bottom: 14px;
+  bottom: 10px;
+  width: 16px;
+  height: 16px;
+  font-size: 0;
+}
+
+.map-popup-content .image-zoom-badge::before {
+  content: "+";
+  display: block;
+  font-size: 0.82rem;
+  line-height: 1;
+  font-weight: 400;
+  font-family: Arial, sans-serif;
+  color: rgba(255, 255, 255, 0.82);
+  position: relative;
+  top: -0.5px;
 }
 
 .map-jump-button {
