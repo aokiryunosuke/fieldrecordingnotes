@@ -657,18 +657,19 @@ h1 {
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 10px;
-  padding: 16px 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
 }
 
 .loading-favicon-spinner {
-  width: 34px;
-  height: 34px;
+  width: 54px;
+  height: 54px;
   display: block;
-  animation: loading-favicon-spin 1.1s linear infinite;
+  animation: loading-favicon-spin 20s steps(120, end) infinite;
+  transform-origin: center center;
 }
 
 @keyframes loading-favicon-spin {
