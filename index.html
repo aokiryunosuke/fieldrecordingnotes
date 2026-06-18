@@ -664,24 +664,14 @@ h1 {
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
-.loading-rainbow-spinner {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: conic-gradient(#ff6b6b, #ffd93d, #6bff95, #6bcfff, #b76bff, #ff6bcb, #ff6b6b);
-  animation: loading-rainbow-spin 0.9s linear infinite;
-  position: relative;
+.loading-favicon-spinner {
+  width: 34px;
+  height: 34px;
+  display: block;
+  animation: loading-favicon-spin 1.1s linear infinite;
 }
 
-.loading-rainbow-spinner::after {
-  content: "";
-  position: absolute;
-  inset: 5px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.92);
-}
-
-@keyframes loading-rainbow-spin {
+@keyframes loading-favicon-spin {
   to {
     transform: rotate(360deg);
   }
@@ -690,7 +680,7 @@ h1 {
 </style>
 </head>
 <body>
-<div id="loadingOverlay"><div class="loading-box"><div class="loading-rainbow-spinner" aria-hidden="true"></div></div></div>
+<div id="loadingOverlay"><div class="loading-box"><img class="loading-favicon-spinner" src="/fieldrecordingnotes/favicon192.png" alt="" aria-hidden="true"/></div></div>
 
 <script>
   // 再生開始時の「ブチッ」を避けるため、先頭をほんの少しだけ飛ばす
@@ -871,7 +861,7 @@ h1 {
       name: "250701_0004.mp3",
       images: ["250701_0004.jpg", "250701_0004_s.jpg"],
       title: "250701_0004",
-      comment: "我が実家、神奈川県川崎市<br>17:00 曇　写真：iPhone 15　録音：DR-07X<hr class='note-line'>",
+      comment: "神奈川県川崎市川崎区大島１丁目４−５サーパス川崎大島付近、家のベッド<br>17:00 曇　写真：iPhone15　録音：Tascam DR-07X IL80<hr class='note-line'>",
       lat: 35.5251565,
       lng: 139.7107704
     },
@@ -879,7 +869,7 @@ h1 {
       name: "250705_0005.mp3",
       images: ["250705_0005.jpg", "250705_0005_s.jpg"],
       title: "250705_0005",
-      comment: "中津川沿い、岩手県盛岡市<br>16:10 晴　写真：iPhone 15　録音：DR-07X<hr class='note-line'>",
+      comment: "岩手県中津川下の橋の付け根にて<br>16:10 晴　写真：iPhone 15　録音：Tascam DR-07X IL80<hr class='note-line'>",
       lat: 39.698466,
       lng: 141.149190
     },
@@ -887,7 +877,7 @@ h1 {
       name: "250705_0007.mp3",
       images: ["250705_0007.jpg", "250705_0007_s.jpg"],
       title: "250705_0007",
-      comment: "中津川沿い、岩手県盛岡市<br>18:30 晴　写真：iPhone 15　録音：DR-07X<hr class='note-line'>",
+      comment: "岩手県中津川の横道にて<br>18:30 晴　写真：iPhone 15　録音：Tascam DR-07X IL80<hr class='note-line'>",
       lat: 39.698803,
       lng: 141.145046
     },
@@ -895,7 +885,7 @@ h1 {
       name: "250706_0016.mp3",
       images: ["250706_0016.jpg", "250706_0016_s.jpg"],
       title: "250706_0016",
-      comment: "焼走り溶岩流、岩手県八幡平市<br>11:37 晴　写真：iPhone 15　録音：DR-07X<hr class='note-line'>",
+      comment: "岩手県焼走り溶岩流<br>11:37 曇り晴れ　写真：iPhone 15　録音：Tascam DR-07X IL80<hr class='note-line'>",
       lat: 39.872986,
       lng: 141.045447
     },
@@ -903,7 +893,7 @@ h1 {
       name: "250706_0017.mp3",
       images: ["250706_0017.jpg", "250706_0017_s.jpg"],
       title: "250706_0017",
-      comment: "ART＋HALF STUDIO、岩手県八幡平市<br>13:00 晴　写真：iPhone 15　録音：DR-07X<hr class='note-line'>",
+      comment: "岩手県八幡平、ART＋HALF STUDIOにて<br>13:00 晴　写真：iPhone 15　録音：Tascam DR-07X IL80<hr class='note-line'>",
       lat: 39.903542,
       lng: 140.981594
     },
@@ -911,7 +901,7 @@ h1 {
       name: "250801_0023.mp3",
       images: ["250801_0023.jpg", "250801_0023_s.jpg"],
       title: "250801_0023",
-      comment: "大阪駅周辺、大阪府大阪市<br>06:40 晴　写真：iPhone 15　録音：DR-07X<hr class='note-line'>",
+      comment: "大阪市大深町<br>06:40 晴　写真：iPhone15　録音：Tascam DR-07X IL80<hr class='note-line'>",
       lat: 34.70500,
       lng: 135.49670
  　　},
@@ -919,7 +909,7 @@ h1 {
       name: "250914_0027.mp3",
       images: ["250914_0027.jpg", "250914_0027_s.jpg"],
       title: "250914_0027",
-      comment: "高尾山六号路、東京都八王子市<br>13:30 晴　写真：iPhone 15　録音：DR-07X<hr class='note-line'>",
+      comment: "八王子市高尾町、高尾山六号路にて<br>13:30 晴　写真：iPhone 15　録音：Tascam DR-07X IL80<hr class='note-line'>",
  　    lat: 35.62600,
       lng: 139.25401
     },
@@ -927,7 +917,7 @@ h1 {
       name: "250920_0031.mp3",
       images: ["250920_0031.jpg", "250920_0031_s.jpg"],
       title: "250920_0031",
-      comment: "ギャラリーf付近、千葉県市川市<br>15:50 小雨　写真：iPhone 15　録音：DR-07X<hr class='note-line'>",
+      comment: "千葉県市川、ギャラリーf付近にて<br>15:50 小雨　写真：iPhone 15　録音：Tascam DR-07X IL80<hr class='note-line'>",
       lat: 35.73496,
       lng: 139.90779
     },
@@ -935,7 +925,7 @@ h1 {
       name: "251202_0065.mp3",
       images: ["251202_0065.jpg", "251202_0065_s.jpg"],
       title: "251202_0065",
-      comment: "川崎区の多摩川沿い、神奈川県川崎市<br>08:40 晴　写真：iPhone 15　録音：DR-07X<hr class='note-line'>",
+      comment: "川崎区鈴木町、多摩川河川敷にて<br>08:40 晴　写真：iPhone 15　録音：Tascam DR-07X IL80<hr class='note-line'>",
       lat: 35.53731,
       lng: 139.71745
     },
@@ -943,7 +933,7 @@ h1 {
       name: "251202_0067.mp3",
       images: ["251202_0067.jpg", "251202_0067_s.jpg"],
       title: "251202_0067",
-      comment: "渋谷駅周辺、東京都渋谷区<br>21:00 晴　写真：iPhone 15　録音：DR-07X<hr class='note-line'>",
+      comment: "渋谷区<br>21:00 晴　写真：iPhone 15　録音：Tascam DR-07X IL80<hr class='note-line'>",
       lat: 35.66005,
       lng: 139.70061
     },
@@ -1079,95 +1069,95 @@ h1 {
       name: "260110_0119.mp3",
       images: ["260110_0119.jpg", "260110_0119_s.jpg"],
       title: "260110_0119",
-      comment: "金田漁港付近、神奈川県三浦市<br>20:40 風　写真：iPhone 15　録音：録音虫<hr class='note-line'>",
-      lat: 35.15792,
-      lng: 139.66702
+      comment: "<br>20:40 風　写真：iPhone 15　録音：録音虫<hr class='note-line'>",
+      lat: 35.15794,
+      lng: 139.66707
      },
      {
       name: "260112_0120.mp3",
       images: ["260112_0120.jpg", "260112_0120_s.jpg"],
       title: "260112_0120",
-      comment: "辻堂駅付近、神奈川県藤沢市<br>09:30 晴　写真：iPhone 15　録音：X8<hr class='note-line'>",
-      lat: 35.3381779,
-      lng: 139.4468239 
+      comment: "渋谷区<br>21:00 晴　写真：iPhone 15　録音：Tascam DR-07X IL80<hr class='note-line'>",
+      lat: 35.66005,
+      lng: 139.70061  
      },
    　{
       name: "260112_0121.mp3",
       images: ["260112_0121.jpg", "260112_0121_s.jpg"],
       title: "260112_0121",
-      comment: "神台公園、神奈川県藤沢市<br>11:19 晴　写真：iPhone 15　録音：X8<hr class='note-line'>",
-      lat: 35.34053,
-      lng: 139.44660
+      comment: "渋谷区<br>21:00 晴　写真：iPhone 15　録音：Tascam DR-07X IL80<hr class='note-line'>",
+      lat: 35.66005,
+      lng: 139.70061  
      },
      {
       name: "260112_0122.mp3",
       images: ["260112_0122.jpg", "260112_0122_s.jpg"],
       title: "260112_0122",
-      comment: "辻堂西海岸、神奈川県藤沢市<br>18:54 晴　写真：iPhone 15　録音：X8<hr class='note-line'>",
-      lat: 35.31880,
-      lng: 139.44443  
+      comment: "渋谷区<br>21:00 晴　写真：iPhone 15　録音：Tascam DR-07X IL80<hr class='note-line'>",
+      lat: 35.66005,
+      lng: 139.70061  
      },
      {
       name: "260116_0125.mp3",
       images: ["260116_0125.jpg", "260116_0125_s.jpg"],
       title: "260116_0125",
-      comment: "二俣川一丁目第三公園、神奈川県横浜市<br>13:08 晴　写真：iPhone 15　録音：X8<hr class='note-line'>",
-      lat: 35.46623,
-      lng: 139.52579
+      comment: "渋谷区<br>21:00 晴　写真：iPhone 15　録音：Tascam DR-07X IL80<hr class='note-line'>",
+      lat: 35.66005,
+      lng: 139.70061  
      },
      {
       name: "260117_0126.mp3",
       images: ["260117_0126.jpg", "260117_0126_s.jpg"],
       title: "260117_0126",
-      comment: "川崎区の多摩川沿い、神奈川県川崎市<br>14:47 晴　写真：iPhone 15　録音：X8<hr class='note-line'>",
-      lat: 35.53910,
-      lng: 139.72061
+      comment: "渋谷区<br>21:00 晴　写真：iPhone 15　録音：Tascam DR-07X IL80<hr class='note-line'>",
+      lat: 35.66005,
+      lng: 139.70061  
      },
      {
       name: "260117_0130.mp3",
       images: ["260117_0130.jpg", "260117_0130_s.jpg"],
       title: "260117_0130",
-      comment: "多摩川河口付近、神奈川県川崎市<br>16:12 晴　写真：iPhone 15　録音：X8<hr class='note-line'>",
-      lat: 35.53712,
-      lng: 139.76599
+      comment: "渋谷区<br>21:00 晴　写真：iPhone 15　録音：Tascam DR-07X IL80<hr class='note-line'>",
+      lat: 35.66005,
+      lng: 139.70061  
      },
      {
       name: "260130_0131.mp3",
       images: ["260130_0131.jpg", "260130_0131_s.jpg"],
       title: "260130_0131",
-      comment: "川崎区の多摩川沿い、神奈川県川崎市<br>11:38 晴　写真：iPhone 15　録音：X8<hr class='note-line'>",
-      lat: 35.54135,
-      lng: 139.72621  
+      comment: "渋谷区<br>21:00 晴　写真：iPhone 15　録音：Tascam DR-07X IL80<hr class='note-line'>",
+      lat: 35.66005,
+      lng: 139.70061  
      },
      {
       name: "260203_0132.mp3",
       images: ["260203_0132.jpg", "260203_0132_s.jpg"],
       title: "260203_0132",
-      comment: "稲毛公園付近、神奈川県川崎市<br>13:42 晴　写真：iPhone 15　録音：X8<hr class='note-line'>",
-      lat: 35.53062,
-      lng: 139.70451
+      comment: "渋谷区<br>21:00 晴　写真：iPhone 15　録音：Tascam DR-07X IL80<hr class='note-line'>",
+      lat: 35.66005,
+      lng: 139.70061  
      },
      {
       name: "260212_0136.mp3",
       images: ["260212_0136.jpg", "260212_0136_s.jpg"],
       title: "260212_0136",
-      comment: "三崎口駅付近、神奈川県三浦市<br>15:40 晴　写真：iPhone 15　録音：X8<hr class='note-line'>",
-      lat: 35.1773767,
-      lng: 139.6336455 
+      comment: "渋谷区<br>21:00 晴　写真：iPhone 15　録音：Tascam DR-07X IL80<hr class='note-line'>",
+      lat: 35.66005,
+      lng: 139.70061  
      },
      {
       name: "260212_0138.mp3",
       images: ["260212_0138.jpg", "260212_0138_s.jpg"],
       title: "260212_0138",
-      comment: "三戸浜付近、神奈川県三浦市<br>16:24 晴　写真：iPhone 15　録音：X8<hr class='note-line'>",
-      lat: 35.17516,
-      lng: 139.62077
+      comment: "渋谷区<br>21:00 晴　写真：iPhone 15　録音：Tascam DR-07X IL80<hr class='note-line'>",
+      lat: 35.66005,
+      lng: 139.70061  
      },
      {
       name: "260219_0152.mp3",
-      images: ["260212_0152.jpg", "260212_0152_s.jpg"],
-      title: "260212_0152",
-      comment: "青山学院大学渋谷区<br>21:00 晴　写真：iPhone 15　録音：Tascam DR-07X IL80<hr class='note-line'>",
+      images: ["260212_0138.jpg", "260212_0138_s.jpg"],
+      title: "260212_0138",
+      comment: "渋谷区<br>21:00 晴　写真：iPhone 15　録音：Tascam DR-07X IL80<hr class='note-line'>",
       lat: 35.66005,
       lng: 139.70061  
      },
