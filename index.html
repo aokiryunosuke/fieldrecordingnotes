@@ -678,10 +678,71 @@ h1 {
   }
 }
 
+
+/* ===== DEV NOTICE: 開発中表示。不要になったらこのブロックを削除 ===== */
+#devNotice {
+  display: none;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2500;
+  width: min(88vw, 430px);
+  box-sizing: border-box;
+  padding: 18px 20px 16px;
+  background: rgba(255, 255, 255, 0.90);
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  border-radius: 12px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.16);
+  color: #333;
+  text-align: center;
+  line-height: 1.65;
+}
+
+#devNotice.show {
+  display: block;
+}
+
+#devNoticeClose {
+  position: absolute;
+  top: 5px;
+  right: 8px;
+  border: none;
+  background: transparent;
+  color: #777;
+  font-size: 1rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+#devNoticeClose:hover {
+  color: #000;
+}
+
+.dev-notice-ja {
+  margin: 0 0 0.55em;
+  font-size: 0.9rem;
+}
+
+.dev-notice-en {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #555;
+}
+/* ===== /DEV NOTICE ===== */
+
 </style>
 </head>
 <body>
 <div id="loadingOverlay"><div class="loading-box"><img class="loading-favicon-spinner" src="/fieldrecordingnotes/favicon192.png" alt="" aria-hidden="true"/></div></div>
+
+<!-- ===== DEV NOTICE: 開発中表示。不要になったらこのブロックを削除 ===== -->
+<div id="devNotice" role="status" aria-live="polite">
+  <button id="devNoticeClose" type="button" aria-label="閉じる">×</button>
+  <p class="dev-notice-ja">このサイトは現在開発中です。現在は一部の機能とコンテンツのみ使用できます。</p>
+  <p class="dev-notice-en">This site is currently under development. Only some features and content are available right now.</p>
+</div>
+<!-- ===== /DEV NOTICE ===== -->
 
 <script>
   // 再生開始時の「ブチッ」を避けるため、先頭をほんの少しだけ飛ばす
@@ -1539,7 +1600,30 @@ h1 {
   function hideLoadingOverlay() {
     const loadingOverlay = document.getElementById("loadingOverlay");
     if (loadingOverlay) loadingOverlay.classList.add("hidden");
+    showDevNotice();
   }
+
+  // ===== DEV NOTICE: 開発中表示。不要になったらこのブロックを削除 =====
+  const SHOW_DEV_NOTICE = true;
+
+  function showDevNotice() {
+    if (!SHOW_DEV_NOTICE) return;
+
+    const devNotice = document.getElementById("devNotice");
+    if (!devNotice) return;
+
+    setTimeout(() => {
+      devNotice.classList.add("show");
+    }, 160);
+  }
+
+  document.addEventListener("click", (event) => {
+    if (event.target && event.target.id === "devNoticeClose") {
+      const devNotice = document.getElementById("devNotice");
+      if (devNotice) devNotice.classList.remove("show");
+    }
+  });
+  // ===== /DEV NOTICE =====
 
   function waitForDelay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
